@@ -350,11 +350,15 @@
 
     <!-- 선거 시뮬레이션 설정 -->
     <div class="control-group" style="border-color: var(--tfr-gold);">
-        <h3 style="color: var(--tfr-gold);">[2] 정당별 오차범위 선거 시뮬레이션</h3>
+        <h3 style="color: var(--tfr-gold);">[2] 선거 시뮬레이션 및 차트 설정</h3>
         <div class="input-row">
             <div class="input-box">
                 <label>전체 의석 수 설정 (기본 300)</label>
                 <input type="number" id="input-total-seats-target" value="300">
+            </div>
+            <div class="input-box" style="flex-direction: row; align-items: center; gap: 10px; min-width: 180px;">
+                <input type="checkbox" id="input-show-majority-line" checked onchange="renderDashboard()">
+                <label style="margin:0; color: #fff; cursor: pointer;" for="input-show-majority-line">과반수 기준선 표시</label>
             </div>
         </div>
         <p style="font-size:12px; color:#888;">* 각 정당에 입력된 '오차(%)' 내에서 지지율이 무작위로 요동칩니다.</p>
@@ -473,10 +477,9 @@
         
         let adjustedParties = parties.map(p => {
             let margin = parseFloat(p.errorMargin) || 0;
-            // 각 정당 고유의 오차범위 내에서 랜덤 스윙 (-margin ~ +margin)
             let swing = (Math.random() * margin * 2) - margin;
             let baseSupport = parseFloat(p.support) || 0;
-            let adjustedSupport = Math.max(0.1, baseSupport + swing); // 최소 지지율 0.1 보정
+            let adjustedSupport = Math.max(0.1, baseSupport + swing); 
             return { ...p, tempSupport: adjustedSupport };
         });
 
@@ -491,12 +494,9 @@
             return { id: p.id, exact, floor, remainder: exact - floor };
         });
 
-        // 남은 의석 최대 잔여 방식(Largest Remainder Method)으로 배분
         let remaining = totalSeatsTarget - seatsAssigned;
         calculations.sort((a, b) => b.remainder - a.remainder);
-        for (let i = 0; i < remaining; i++) {
-            calculations[i].floor += 1;
-        }
+        for (let i = 0; i < remaining; i++) { calculations[i].floor += 1; }
 
         calculations.forEach(calc => {
             const p = parties.find(party => party.id === calc.id);
@@ -684,6 +684,16 @@
                 currentAngle = endAngle;
             });
         }
+
+        // 🔥 과반수(50%) 기준선 및 삼각형 지표 🔥
+        const showMajorityLine = document.getElementById('input-show-majority-line').checked;
+        if (showMajorityLine) {
+            svg.innerHTML += `
+                <line x1="300" y1="10" x2="300" y2="210" stroke="#ffffff" stroke-width="1.5" stroke-dasharray="4" opacity="0.7" />
+                <polygon points="300,22 293,8 307,8" fill="#ffffff" stroke="#000000" stroke-width="0.5" />
+            `;
+        }
+
         svg.innerHTML += `
             <circle cx="300" cy="290" r="48" fill="url(#emblem-bg)" stroke="#050505" stroke-width="3" filter="url(#shadow)" />
             <image href="${parliamentIconUrl}" crossorigin="anonymous" x="262" y="252" width="76" height="76" preserveAspectRatio="xMidYMid meet" style="filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.7)) brightness(0.8) sepia(0.3);" />
@@ -722,6 +732,7 @@
             subIdeo2: document.getElementById('input-sub-ideo-2-name').value,
             leaderImg: document.getElementById('ui-leader-img').src,
             parliamentIcon: parliamentIconUrl,
+            showMajorityLine: document.getElementById('input-show-majority-line').checked,
             selectedPartyId, parties
         };
         const dl = document.createElement('a');
@@ -738,10 +749,10 @@
             try {
                 const d = JSON.parse(e.target.result);
                 document.getElementById('input-leader-name').value = d.leaderName;
-                document.getElementById('input-focus-name').value = d.focusName;
-                document.getElementById('input-ideology').value = d.ideology;
                 document.getElementById('ui-leader-name').innerText = d.leaderName;
+                document.getElementById('input-focus-name').value = d.focusName;
                 document.getElementById('ui-focus-name').innerText = d.focusName;
+                document.getElementById('input-ideology').value = d.ideology;
                 document.getElementById('ui-ideology').innerText = d.ideology;
                 if(d.subIdeo1) {
                     document.getElementById('input-sub-ideo-1-name').value = d.subIdeo1;
@@ -756,6 +767,9 @@
                     parliamentIconUrl = d.parliamentIcon; 
                     document.getElementById('preview-parliament-icon').src = d.parliamentIcon;
                     document.getElementById('ui-parliament-icon-small').src = d.parliamentIcon;
+                }
+                if(d.showMajorityLine !== undefined) {
+                    document.getElementById('input-show-majority-line').checked = d.showMajorityLine;
                 }
                 parties = d.parties; selectedPartyId = d.selectedPartyId;
                 renderControls(); renderDashboard(); alert("데이터 로드 완료");
