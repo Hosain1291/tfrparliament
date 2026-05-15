@@ -29,7 +29,7 @@
             margin: 0 auto;
             padding: 20px 10px;
             display: flex;
-            flex-direction: column;
+            flex-direction: column; 
             align-items: center;
             gap: 40px;
             width: 100%;
@@ -41,7 +41,7 @@
 
         @media (min-width: 1100px) {
             body {
-                flex-direction: row;
+                flex-direction: row; 
                 align-items: flex-start;
                 justify-content: center;
                 padding: 20px;
@@ -116,10 +116,9 @@
         th, td { border: 1px solid #2a2a2a; padding: 12px; text-align: center; font-size: 15px; vertical-align: middle; }
         th { background: #222; color: #fff; font-weight: normal; }
 
-        /* 입력창 글자색을 하얀색으로 수정 */
         input[type="text"], input[type="number"], textarea {
             width: 100%; background: var(--tfr-input-bg); 
-            color: #ffffff; /* 초록색(#0f0)에서 하얀색으로 변경 */
+            color: #ffffff; 
             border: 1px solid #333;
             font-family: 'NeoDonggeunmo', sans-serif; padding: 10px; box-sizing: border-box; 
             font-size: 16px; outline: none;
@@ -128,7 +127,6 @@
         textarea { resize: vertical; height: 60px; }
         input[type="color"] { width: 50px; height: 40px; padding: 0; border: none; cursor: pointer; background: none; }
         
-        /* 파일 업로드 드래그존 스타일 */
         .square-file-upload {
             display: inline-flex;
             justify-content: center;
@@ -143,7 +141,6 @@
             transition: all 0.2s;
         }
         .square-file-upload.dragover { border-color: var(--tfr-pink); background: #222; transform: scale(1.05); }
-        .square-file-upload input[type="file"] { display: none; }
         .square-file-upload img { width: 100%; height: 100%; object-fit: contain; position: absolute; z-index: 1; pointer-events: none; }
         .square-file-upload span { font-size: 24px; color: #444; z-index: 0; }
         .square-file-upload::after {
@@ -218,35 +215,44 @@
         .leader-img { width: 100%; aspect-ratio: 4 / 5; height: auto; object-fit: cover; }
         .leader-name { background: #222; color: #fff; text-align: center; padding: 6px; font-size: 16px; border-top: 2px solid #444; }
         
-        .focus-box { flex: 1; display: flex; flex-direction: column; gap: 15px; margin-top: 10px; }
+        .focus-box { flex: 1; display: flex; flex-direction: column; gap: 15px; margin-top: 5px; }
+        
         .focus-current {
-            background: rgba(0, 0, 0, 0.4); 
-            border: 1px solid #444;
+            background: #000; 
+            border: 2px solid #1a1a1a;
             height: 80px; 
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
             color: #fff;
-            text-shadow: 1px 1px 0px #000;
+            text-shadow: 0 0 5px var(--tfr-pink);
             font-size: 20px;
             box-sizing: border-box;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            box-shadow: inset 0 0 20px rgba(0,0,0,1);
+        }
+        
+        .focus-inner-glow-frame {
+            position: absolute;
+            top: 5px; left: 5px; right: 5px; bottom: 5px;
+            border: 1.5px solid var(--tfr-pink);
+            box-shadow: 0 0 8px var(--tfr-pink), inset 0 0 4px var(--tfr-pink);
+            pointer-events: none;
+            opacity: 0.8;
         }
 
-        .focus-icon-wrapper {
-            position: absolute;
-            left: 0px; top: 50%; transform: translate(-30%, -50%); 
-            z-index: 10; pointer-events: none; display: flex; align-items: center; justify-content: center;
+        .focus-text { z-index: 2; position: relative; }
+        
+        .focus-progress { 
+            position: absolute; 
+            bottom: 8px; left: 10px; right: 10px; 
+            height: 4px; background: #222; z-index: 3; 
         }
-        .focus-icon-wrapper img {
-            max-width: 180px; max-height: 140px;
-            height: auto; width: auto;
-            object-fit: contain; filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.8)); 
+        .focus-progress-fill { 
+            height: 100%; width: 75%; 
+            background: linear-gradient(90deg, #8a2be2, var(--tfr-pink)); 
+            box-shadow: 0 0 8px var(--tfr-pink); 
         }
-        .focus-text { z-index: 2; }
-        .focus-progress { position: absolute; bottom: 0; left: 0; right: 0; height: 5px; background: #222; z-index: 3; }
-        .focus-progress-fill { height: 100%; width: 65%; background: var(--tfr-pink); box-shadow: 0 0 5px var(--tfr-pink); }
 
         .politics-bottom { display: flex; gap: 15px; align-items: stretch; }
         .ideology-box { width: 220px; background: #0c0c0c; border: 1px solid #444; padding: 15px; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box; flex-shrink: 0; }
@@ -297,14 +303,14 @@
     
     <!-- 정치 창 설정 -->
     <div class="control-group">
-        <h3>[1] 정치 창 및 지도자 설정</h3>
+        <h3>[1] 정치 창 및 국회 아이콘 설정</h3>
         <div class="input-row">
             <div class="input-box">
                 <label>지도자 이름</label>
                 <input type="text" id="input-leader-name" value="김재연" oninput="document.getElementById('ui-leader-name').innerText=this.value || '[지도자 이름]'">
             </div>
             <div class="input-box">
-                <label>국가 중점</label>
+                <label>국가 중점 명칭</label>
                 <input type="text" id="input-focus-name" value="왕국 지원" oninput="document.getElementById('ui-focus-name').innerText=this.value || '[국가 중점]'">
             </div>
             <div class="input-box">
@@ -314,20 +320,20 @@
         </div>
         
         <div class="input-row">
-            <div class="input-box">
-                <label>지도자 사진 (드래그 가능)</label>
+            <div class="input-box" style="flex: 0 0 auto;">
+                <label>지도자 사진 (드래그)</label>
                 <label class="square-file-upload" id="drop-leader" style="width: 80px; height: 100px;">
                     <input type="file" accept="image/*" onchange="handleFileUploadGlobal(event, 'ui-leader-img', 'preview-ui-leader-img')">
                     <span>+</span>
                     <img id="preview-ui-leader-img" src="" alt="">
                 </label>
             </div>
-            <div class="input-box">
-                <label>중점 아이콘 (드래그 가능)</label>
-                <label class="square-file-upload" id="drop-focus" style="width: 80px; height: 100px;">
-                    <input type="file" accept="image/*" onchange="handleFileUploadGlobal(event, 'ui-focus-icon', 'preview-ui-focus-icon')">
+            <div class="input-box" style="flex: 0 0 auto;">
+                <label>국회 로고 (드래그)</label>
+                <label class="square-file-upload" id="drop-parliament" style="width: 80px; height: 80px; border-color: var(--tfr-gold);">
+                    <input type="file" accept="image/*" onchange="handleFileUploadGlobal(event, 'ui-parliament-icon-svg', 'preview-parliament-icon')">
                     <span>+</span>
-                    <img id="preview-ui-focus-icon" src="" alt="" style="display:none;">
+                    <img id="preview-parliament-icon" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Emblem_of_the_National_Assembly_of_Korea.svg/3840px-Emblem_of_the_National_Assembly_of_Korea.svg.png" alt="">
                 </label>
             </div>
         </div>
@@ -338,17 +344,17 @@
         <h3 style="color: var(--tfr-gold);">[2] 선거 시뮬레이션 설정</h3>
         <div class="input-row">
             <div class="input-box">
-                <label>전체 의석 수 설정 (예: 300)</label>
+                <label>전체 의석 수 설정 (기본 300)</label>
                 <input type="number" id="input-total-seats-target" value="300">
             </div>
         </div>
-        <p style="font-size:12px; color:#888;">* 아래 정당 목록의 '지지도(%)'를 기반으로 의석을 자동 산출합니다.</p>
-        <button class="btn-simulate" onclick="runElectionSimulation()">🗳️ 선거 결과 자동 계산 실행</button>
+        <p style="font-size:12px; color:#888;">* 각 정당의 '지지도(%)'를 수정한 뒤 아래 버튼을 누르면 의석이 재배분됩니다.</p>
+        <button class="btn-simulate" onclick="runElectionSimulation()">선거 결과 자동 산출 (재시도 가능)</button>
     </div>
 
     <!-- 정당 및 의석 설정 -->
     <div class="control-group">
-        <h3 style="color: var(--tfr-purple);">[3] 정당 및 의석 데이터 설정</h3>
+        <h3 style="color: var(--tfr-purple);">[3] 정당 상세 데이터 설정</h3>
         <button class="btn-add" onclick="addParty()">+ 새 정당 추가</button>
         <div class="table-responsive">
             <table>
@@ -372,12 +378,12 @@
     </div>
 
     <div class="data-action-row">
-        <button class="btn-save-json" onclick="saveDataAsJSON()">💾 데이터 저장 (JSON)</button>
-        <label for="load-json-input" class="btn-load-json">📂 데이터 불러오기</label>
+        <button class="btn-save-json" onclick="saveDataAsJSON()">데이터 저장 (JSON)</button>
+        <label for="load-json-input" class="btn-load-json">데이터 불러오기</label>
         <input type="file" id="load-json-input" accept=".json" style="display:none;" onchange="loadDataFromJSON(event)">
     </div>
 
-    <button class="btn-save" onclick="saveImage()">📸 통합 화면 이미지 저장</button>
+    <button class="btn-save" onclick="saveImage()">통합 화면 이미지 저장</button>
 </div>
 
 <!-- 우측 캡처 영역 -->
@@ -397,9 +403,7 @@
                     </div>
                     <div class="focus-box">
                         <div class="focus-current">
-                            <div class="focus-icon-wrapper">
-                                <img id="ui-focus-icon" src="" alt="" style="display:none;">
-                            </div>
+                            <div class="focus-inner-glow-frame"></div>
                             <div class="focus-text" id="ui-focus-name">왕국 지원</div>
                             <div class="focus-progress"><div class="focus-progress-fill"></div></div>
                         </div>
@@ -426,7 +430,7 @@
         <div class="hoi4-window parliament-window">
             <div class="hoi4-header">
                 <div class="header-title">
-                    <img class="header-icon" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Emblem_of_the_National_Assembly_of_Korea.svg/3840px-Emblem_of_the_National_Assembly_of_Korea.svg.png" crossorigin="anonymous" alt="icon">
+                    <img id="ui-parliament-icon-small" class="header-icon" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Emblem_of_the_National_Assembly_of_Korea.svg/3840px-Emblem_of_the_National_Assembly_of_Korea.svg.png" crossorigin="anonymous" alt="icon">
                     국회
                 </div>
                 <div class="header-btn">ᐱ</div>
@@ -445,6 +449,7 @@
     let partyIdCounter = 6;
     let parties = [];
     let selectedPartyId = 3; 
+    let parliamentIconUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Emblem_of_the_National_Assembly_of_Korea.svg/3840px-Emblem_of_the_National_Assembly_of_Korea.svg.png";
 
     function generateSampleImage(text, color) {
         let canvas = document.createElement('canvas');
@@ -455,7 +460,6 @@
         return canvas.toDataURL('image/png');
     }
 
-    // 선거 시뮬레이션: 최대 잔여 방식 적용
     function runElectionSimulation() {
         const totalSeats = parseInt(document.getElementById('input-total-seats-target').value) || 300;
         let totalSupport = parties.reduce((sum, p) => sum + (parseFloat(p.support) || 0), 0);
@@ -483,10 +487,8 @@
 
         renderControls();
         renderDashboard();
-        alert(`총 ${totalSeats}석 기준 선거 시뮬레이션 완료!`);
     }
 
-    // 드래그 앤 드롭 시스템 초기화
     function setupDragAndDrop(elementId, callback) {
         const zone = document.getElementById(elementId);
         if (!zone) return;
@@ -520,11 +522,11 @@
             document.getElementById('preview-ui-leader-img').src = data;
         });
 
-        setupDragAndDrop('drop-focus', (data) => {
-            const uiImg = document.getElementById('ui-focus-icon');
-            uiImg.src = data; uiImg.style.display = "block";
-            document.getElementById('preview-ui-focus-icon').src = data;
-            document.getElementById('preview-ui-focus-icon').style.display = "block";
+        setupDragAndDrop('drop-parliament', (data) => {
+            parliamentIconUrl = data;
+            document.getElementById('preview-parliament-icon').src = data;
+            document.getElementById('ui-parliament-icon-small').src = data;
+            renderDashboard(); 
         });
 
         renderControls();
@@ -537,17 +539,23 @@
             const reader = new FileReader();
             reader.onload = (e) => {
                 const imgData = e.target.result;
-                const uiImg = document.getElementById(targetId);
-                if(uiImg) { uiImg.src = imgData; uiImg.style.display = "block"; uiImg.style.backgroundColor = "transparent"; }
+                if(targetId === 'ui-parliament-icon-svg') {
+                    parliamentIconUrl = imgData;
+                    document.getElementById('ui-parliament-icon-small').src = imgData;
+                } else {
+                    const uiImg = document.getElementById(targetId);
+                    if(uiImg) { uiImg.src = imgData; uiImg.style.display = "block"; uiImg.style.backgroundColor = "transparent"; }
+                }
                 const previewImg = document.getElementById(previewId);
                 if(previewImg) { previewImg.src = imgData; previewImg.style.display = "block"; previewImg.style.backgroundColor = "transparent"; }
+                renderDashboard();
             };
             reader.readAsDataURL(file);
         }
     }
 
     function addParty() {
-        parties.push({ id: partyIdCounter++, name: "새 정당", color: "#666666", seats: 10, support: 0, isCoalition: false, logoUrl: '', infoImageUrl: '', description: "새로운 정당에 대한 설명입니다." });
+        parties.push({ id: partyIdCounter++, name: "새 정당", color: "#666666", seats: 10, support: 0, isCoalition: false, logoUrl: '', infoImageUrl: '', description: "" });
         renderControls(); renderDashboard();
     }
 
@@ -610,7 +618,6 @@
             `;
             tbody.appendChild(tr);
 
-            // 로드 직후 드래그 앤 드롭 바인딩
             setTimeout(() => {
                 setupDragAndDrop(`drop-logo-${p.id}`, (data) => { updateParty(p.id, 'logoUrl', data); renderControls(); });
                 setupDragAndDrop(`drop-info-${p.id}`, (data) => { updateParty(p.id, 'infoImageUrl', data); renderControls(); });
@@ -648,7 +655,14 @@
         pie.style.background = gradientParts.length ? `conic-gradient(${gradientParts.join(', ')})` : '#333';
 
         const svg = document.getElementById('parliament-svg');
-        svg.innerHTML = `<defs><radialGradient id="emblem-bg" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#3d1b1b" /><stop offset="100%" stop-color="#120606" /></radialGradient><filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.8"/></filter></defs>`;
+        svg.innerHTML = `
+            <defs>
+                <radialGradient id="emblem-bg" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#3d1b1b" />
+                    <stop offset="100%" stop-color="#120606" />
+                </radialGradient>
+                <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.8"/></filter>
+            </defs>`;
         const bgPathD = describeArc(300, 290, 80, 280, Math.PI, 0);
         svg.innerHTML += `<path d="${bgPathD}" fill="#1c1c1c" stroke="#000" stroke-width="2" />`;
 
@@ -668,11 +682,24 @@
                 currentAngle = endAngle;
             });
         }
-        svg.innerHTML += `<line x1="300" y1="10" x2="300" y2="210" stroke="#ccc" stroke-width="1.5" /><polygon points="293,10 307,10 300,25" fill="#ccc" stroke="#000" stroke-width="1" /><line x1="20" y1="290" x2="218" y2="290" stroke="#050505" stroke-width="8" /><line x1="382" y1="290" x2="580" y2="290" stroke="#050505" stroke-width="8" /><line x1="20" y1="290" x2="218" y2="290" stroke="#333" stroke-width="2" /><line x1="382" y1="290" x2="580" y2="290" stroke="#333" stroke-width="2" /><path d="M 218 290 A 82 82 0 0 1 382 290" fill="none" stroke="#050505" stroke-width="6" /><path d="M 218 290 A 82 82 0 0 1 382 290" fill="none" stroke="#222" stroke-width="2" /><circle cx="300" cy="290" r="48" fill="url(#emblem-bg)" stroke="#050505" stroke-width="3" filter="url(#shadow)" /><circle cx="300" cy="290" r="45" fill="none" stroke="#555" stroke-width="1.5" /><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Emblem_of_the_National_Assembly_of_Korea.svg/3840px-Emblem_of_the_National_Assembly_of_Korea.svg.png" crossorigin="anonymous" x="262" y="252" width="76" height="76" preserveAspectRatio="xMidYMid meet" style="filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.7)) brightness(0.8) sepia(0.3);" />`;
+        
+        svg.innerHTML += `
+            <line x1="300" y1="10" x2="300" y2="210" stroke="#ccc" stroke-width="1.5" />
+            <polygon points="293,10 307,10 300,25" fill="#ccc" stroke="#000" stroke-width="1" />
+            <line x1="20" y1="290" x2="218" y2="290" stroke="#050505" stroke-width="8" />
+            <line x1="382" y1="290" x2="580" y2="290" stroke="#050505" stroke-width="8" />
+            <line x1="20" y1="290" x2="218" y2="290" stroke="#333" stroke-width="2" />
+            <line x1="382" y1="290" x2="580" y2="290" stroke="#333" stroke-width="2" />
+            <path d="M 218 290 A 82 82 0 0 1 382 290" fill="none" stroke="#050505" stroke-width="6" />
+            <path d="M 218 290 A 82 82 0 0 1 382 290" fill="none" stroke="#222" stroke-width="2" />
+            <circle cx="300" cy="290" r="48" fill="url(#emblem-bg)" stroke="#050505" stroke-width="3" filter="url(#shadow)" />
+            <circle cx="300" cy="290" r="45" fill="none" stroke="#555" stroke-width="1.5" />
+            <image href="${parliamentIconUrl}" crossorigin="anonymous" x="262" y="252" width="76" height="76" preserveAspectRatio="xMidYMid meet" style="filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.7)) brightness(0.8) sepia(0.3);" />
+        `;
 
         const coalSeats = parties.filter(p => p.isCoalition).reduce((sum, p) => sum + p.seats, 0);
         const coalPct = totalSeats > 0 ? ((coalSeats / totalSeats) * 100).toFixed(1) : 0;
-        let leftHtml = `<div class="party-list-compact"><div class="coalition-summary">👑 연립정부 의석: ${coalSeats}석 (${coalPct}%)</div>`;
+        let leftHtml = `<div class="party-list-compact"><div class="coalition-summary">연립정부 의석: ${coalSeats}석 (${coalPct}%)</div>`;
         parties.forEach(p => { leftHtml += `<div class="party-item-compact"><img src="${p.logoUrl || ''}" style="${p.logoUrl ? '' : 'display:none'}"><span style="color: ${p.color};">${p.name} (${p.seats}석)</span>${p.isCoalition ? '<span class="coalition-badge">여당</span>' : ''}</div>`; });
         leftHtml += '</div>';
 
@@ -688,11 +715,11 @@
             focusName: document.getElementById('input-focus-name').value,
             ideology: document.getElementById('input-ideology').value,
             leaderImg: document.getElementById('ui-leader-img').src,
-            focusIcon: document.getElementById('ui-focus-icon').src,
+            parliamentIcon: parliamentIconUrl,
             selectedPartyId, parties
         };
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
-        const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", "TFRKP_데이터.json"); dl.click();
+        const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", "TFRKP_Data.json"); dl.click();
     }
 
     function loadDataFromJSON(event) {
@@ -709,7 +736,11 @@
                 document.getElementById('ui-focus-name').innerText = d.focusName;
                 document.getElementById('ui-ideology').innerText = d.ideology;
                 if(d.leaderImg) { document.getElementById('ui-leader-img').src = d.leaderImg; document.getElementById('preview-ui-leader-img').src = d.leaderImg; }
-                if(d.focusIcon) { document.getElementById('ui-focus-icon').src = d.focusIcon; document.getElementById('ui-focus-icon').style.display = "block"; document.getElementById('preview-ui-focus-icon').src = d.focusIcon; document.getElementById('preview-ui-focus-icon').style.display = "block"; }
+                if(d.parliamentIcon) { 
+                    parliamentIconUrl = d.parliamentIcon; 
+                    document.getElementById('preview-parliament-icon').src = d.parliamentIcon;
+                    document.getElementById('ui-parliament-icon-small').src = d.parliamentIcon;
+                }
                 parties = d.parties; selectedPartyId = d.selectedPartyId;
                 renderControls(); renderDashboard(); alert("데이터 로드 완료");
             } catch(e) { alert("로드 실패"); }
