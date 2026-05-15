@@ -36,7 +36,7 @@
             max-width: 1800px;
             box-sizing: border-box;
             background-image: linear-gradient(rgba(18, 18, 18, 0.5) 50%, transparent 50%);
-            background-size: 100% 4px;
+            background-size: 100% 4px; /* 가로 스캔라인 효과 */
         }
 
         @media (min-width: 1100px) {
@@ -253,6 +253,7 @@
         .ideology-box { width: 220px; background: #0c0c0c; border: 1px solid #444; padding: 15px; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box; flex-shrink: 0; }
         .ideo-title { font-size: 17px; color: #ccc; text-align: center; border-bottom: 1px solid #333; padding-bottom: 10px; }
         .ideo-sub { display: flex; align-items: center; gap: 10px; font-size: 14px; color: #aaa; }
+        .ideo-icon-slot { width: 28px; height: 28px; background: transparent; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
         
         .party-box { flex: 1; background: #0c0c0c; border: 1px solid #444; display: flex; padding: 15px; gap: 15px; box-sizing: border-box; align-items: center;}
         .pie-container { position: relative; width: 100px; height: 100px; display: flex; justify-content: center; align-items: center; }
@@ -377,6 +378,7 @@
                         <th>의석</th>
                         <th>로고</th>
                         <th>상세사진</th>
+                        <th>상세설명</th>
                         <th>삭제</th>
                     </tr>
                 </thead>
@@ -618,6 +620,7 @@
                 <td><input type="number" value="${p.seats}" oninput="updateParty(${p.id}, 'seats', this.value)"></td>
                 <td><label class="square-file-upload" id="drop-logo-${p.id}"><input type="file" accept="image/*" onchange="handleRowFileUpload(event, ${p.id}, 'logoUrl')"><span>+</span><img src="${p.logoUrl || ''}" style="${p.logoUrl ? '' : 'display:none'}"></label></td>
                 <td><label class="square-file-upload" id="drop-info-${p.id}"><input type="file" accept="image/*" onchange="handleRowFileUpload(event, ${p.id}, 'infoImageUrl')"><span>+</span><img src="${p.infoImageUrl || ''}" style="${p.infoImageUrl ? '' : 'display:none'}"></label></td>
+                <td><textarea oninput="updateParty(${p.id}, 'description', this.value)">${p.description || ''}</textarea></td>
                 <td><button class="btn-del" onclick="removeParty(${p.id})">X</button></td>
             `;
             tbody.appendChild(tr);
@@ -686,7 +689,7 @@
             <image href="${parliamentIconUrl}" crossorigin="anonymous" x="262" y="252" width="76" height="76" preserveAspectRatio="xMidYMid meet" style="filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.7)) brightness(0.8) sepia(0.3);" />
         `;
 
-        // 하단 요약
+        // 하단 요약 및 정보
         const coalSeats = parties.filter(p => p.isCoalition).reduce((sum, p) => sum + p.seats, 0);
         const coalPct = totalSeats > 0 ? ((coalSeats / totalSeats) * 100).toFixed(1) : 0;
         document.getElementById('coalition-summary-area').innerHTML = `<div class="coalition-summary">연립정부 의석: ${coalSeats}석 (${coalPct}%)</div>`;
