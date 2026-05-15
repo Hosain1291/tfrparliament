@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TFR 국회 시뮬레이터</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        @font-face {
+            font-family: 'RoundedFixedsys';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.woff') format('woff');
+            font-weight: normal;
+            font-display: swap;
+        }
+
+        /* 전체 레이아웃 (반응형 꽉 차게) */
+        body {
+            background-color: #000;
+            color: #ddd;
+            font-family: 'RoundedFixedsys', sans-serif;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column; /* 기본적으로 위아래 배치 */
+            align-items: center;
+            gap: 40px;
+            width: 100%;
+            max-width: 1800px; /* 아주 큰 모니터 대응 */
+            box-sizing: border-box;
+        }
+
+        /* PC 화면 (1100px 이상) 꽉 채우기 모드 */
+        @media (min-width: 1100px) {
+            body {
+                flex-direction: column; /* 좌우(row) 배치를 해제하고 무조건 아래로(column) 배치 */
+                align-items: center;
+                justify-content: flex-start;
+            }
+            .controls-panel {
+                width: 100%;
+                max-width: 1100px; 
+            }
+            #capture-area {
+                width: 100%;
+                max-width: 650px; /* 캡처 화면 중앙 고정 확장 */
+            }
+        }
+
+        /* ---------------- 좌측 제어판 스타일 ---------------- */
+        .controls-panel {
+            background: #1a1a1a;
+            border: 2px solid #555;
+            padding: 20px;
+            box-shadow: 4px 4px 0 #000;
+            width: 100%;
+            box-sizing: border-box;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .controls-panel h2 {
+            margin-top: 0;
+            color: #fff;
+            text-align: center;
+            border-bottom: 2px dashed #444;
+            padding-bottom: 10px;
+            font-size: 26px;
+        }
+
+        .control-group {
+            margin-bottom: 25px;
+            background: #222;
+            padding: 20px;
+            border: 1px solid #333;
+        }
+
+        .control-group h3 {
+            margin-top: 0;
+            color: #ff0077;
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+            flex-wrap: wrap; /* 창 크기에 따라 줄바꿈 허용 */
+        }
+
+        .input-box {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 120px; 
+        }
+
+        .input-box label { color: #aaa; font-size: 15px; }
+        
+        /* 표 스타일 대형화 */
+        .table-responsive { width: 100%; overflow-x: auto; margin-bottom: 20px; }
+        table { width: 100%; min-width: 800px; border-collapse: collapse; }
+        th, td { border: 1px solid #333; padding: 10px; text-align: center; font-size: 15px; vertical-align: middle; }
+        th { background: #2a2a2a; color: #fff; }
+
+        input[type="text"], input[type="number"], textarea {
+            width: 100%; background: #000; color: #fff; border: 1px solid #555;
+            font-family: 'RoundedFixedsys', sans-serif; padding: 8px; box-sizing: border-box; font-size: 15px;
+        }
+        textarea { resize: vertical; height: 50px; }
+        input[type="color"] { width: 45px; height: 35px; padding: 0; border: none; cursor: pointer; background: none; }
+        
+        /* 네모칸 모양 파일 업로드 버튼 스타일 */
+        .square-file-upload {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 44px;
+            height: 44px;
+            background-color: #111;
+            border: 2px dashed #777;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+        .square-file-upload:hover { border-color: #d95a2b; }
+        .square-file-upload input[type="file"] { display: none; }
+        .square-file-upload img {
+            width: 100%; height: 100%; object-fit: contain;
+            position: absolute; top: 0; left: 0; z-index: 1; pointer-events: none;
+        }
+        .square-file-upload span { font-size: 20px; color: #555; z-index: 0; }
+        .square-file-upload::after {
+            content: "업로드"; position: absolute; bottom: 0; left: 0; width: 100%;
+            background: rgba(0,0,0,0.8); color: #fff; font-size: 10px; text-align: center;
+            padding: 2px 0; opacity: 0; transition: opacity 0.2s; z-index: 2;
+        }
+        .square-file-upload:hover::after { opacity: 1; }
+
+        input[type="checkbox"] { width: 22px; height: 22px; cursor: pointer; accent-color: #d95a2b; }
+
+        button { font-family: 'RoundedFixedsys', sans-serif; background: #333; color: #fff; border: 2px solid #666; padding: 8px 15px; cursor: pointer; font-size: 15px; text-align: center;}
+        button:hover { background: #444; }
+        .btn-add { background: #004400; width: 100%; font-size: 18px; margin-bottom: 10px; padding: 15px;}
+        .btn-add:hover { background: #006600; }
+        .btn-del { background: #660000; border-color: #990000; }
+        .btn-del:hover { background: #990000; }
+        .btn-save { background: #002266; width: 100%; font-size: 20px; padding: 20px; margin-top: 10px; border-color: #0044cc; }
+        .btn-save:hover { background: #003399; }
+
+        .data-action-row { display: flex; gap: 15px; margin-top: 20px; }
+        .btn-save-json { flex: 1; background: #440066; border-color: #8800cc; font-size: 18px; padding: 15px; }
+        .btn-save-json:hover { background: #660099; }
+        .btn-load-json { flex: 1; background: #004d40; border: 2px solid #00897b; font-size: 18px; padding: 15px; cursor: pointer; text-align: center; color: #fff; font-family: 'RoundedFixedsys', sans-serif;}
+        .btn-load-json:hover { background: #00695c; }
+
+        /* ---------------- 우측 캡처 캔버스 (전체 레이아웃) ---------------- */
+        #capture-area {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 25px;
+            background: #0a0a0a;
+            background-image: linear-gradient(#111 1px, transparent 1px), linear-gradient(90deg, #111 1px, transparent 1px);
+            background-size: 20px 20px;
+            border: 2px solid #222;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* 공통 윈도우 스타일 */
+        .hoi4-window {
+            width: 100%;
+            background: #111;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .hoi4-header {
+            background: linear-gradient(to bottom, #333 0%, #151515 100%);
+            border-bottom: 2px solid #000;
+            border-top: 1px solid #555;
+            padding: 6px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-title { color: #fff; font-size: 18px; text-shadow: 1px 1px 2px #000; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+        .header-icon { width: 24px; height: 24px; object-fit: contain; border: 1px solid #000; border-radius: 50%; background: #222; }
+        .header-btn { border: 1px solid #555; background: #222; color: #ccc; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; }
+
+        /* ================= 1. 정치 창 (스케일 업) ================= */
+        .politics-window {
+            border: 2px solid #ff0077;
+            box-shadow: 0 0 15px rgba(255,0,119,0.4), inset 0 0 15px rgba(0,0,0,1);
+        }
+        .politics-content {
+            padding: 15px;
+            background: repeating-linear-gradient(0deg, #141414, #141414 2px, #1a1a1a 2px, #1a1a1a 4px);
+            display: flex; flex-direction: column; gap: 15px;
+        }
+        .politics-top { display: flex; gap: 15px; position: relative;}
+        
+        .leader-box { display: flex; flex-direction: column; width: 160px; border: 2px solid #444; background: #000; flex-shrink: 0; position: relative; z-index: 1;}
+        /* 지도자 사진 4:5 비율 고정 */
+        .leader-img { width: 100%; aspect-ratio: 4 / 5; height: auto; object-fit: cover; }
+        .leader-name { background: #222; color: #fff; text-align: center; padding: 6px; font-size: 16px; border-top: 2px solid #444; }
+        
+        .focus-box { flex: 1; display: flex; flex-direction: column; gap: 15px; margin-top: 10px; }
+        
+        /* 🔥 새로 개편된 국가 중점(Focus) 칸 스타일 🔥 */
+        .focus-current {
+            background: rgba(0, 0, 0, 0.2); /* 정치 창 배경이 은은하게 비치도록 투명도 적용 */
+            border: 1px solid #444;
+            height: 80px; /* 기존보다 약간 더 높게 조정 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            color: #fff;
+            text-shadow: 1px 1px 0px #000;
+            font-size: 18px;
+            box-sizing: border-box;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .focus-text {
+            z-index: 2;
+        }
+
+        .focus-progress {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 5px;
+            background: #222;
+            z-index: 3;
+        }
+        .focus-progress-fill {
+            height: 100%;
+            width: 65%;
+            background: #d900ff; /* 첨부 이미지의 얇은 자홍색 바 */
+            box-shadow: 0 0 5px #d900ff;
+        }
+        
+        .politics-bottom { display: flex; gap: 15px; align-items: stretch; }
+        .ideology-box { width: 220px; background: #111; border: 1px solid #444; padding: 15px; display: flex; flex-direction: column; gap: 15px; box-sizing: border-box; flex-shrink: 0; }
+        
+        .ideo-title { font-size: 18px; color: #ccc; border-bottom: 1px solid #333; padding-bottom: 10px; text-align: center; }
+        .ideo-sub { display: flex; align-items: center; gap: 10px; font-size: 14px; color: #aaa; }
+        .ideo-icon { width: 28px; height: 28px; background: #222; border: 1px solid #444; border-radius: 50%; }
+        
+        .party-box { flex: 1; background: #111; border: 1px solid #444; display: flex; padding: 15px; gap: 15px; box-sizing: border-box; align-items: center;}
+        .pie-container { position: relative; width: 100px; height: 100px; display: flex; justify-content: center; align-items: center; }
+        .pie-ring { position: absolute; width: 110px; height: 110px; border-radius: 50%; border: 4px solid #444; box-shadow: inset 0 0 5px #000, 0 0 5px #000; pointer-events: none; }
+        .pie-chart { width: 100px; height: 100px; border-radius: 50%; }
+        .party-list-sm { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+        .party-row-sm { display: flex; align-items: center; font-size: 13px; color: #ddd; }
+        .party-color-box { width: 12px; height: 12px; margin-right: 6px; border: 1px solid #000; }
+
+        /* ================= 2. 국회 창 (스케일 업) ================= */
+        .parliament-window {
+            border: 2px solid #d95a2b; 
+            box-shadow: 0 0 15px rgba(217, 90, 43, 0.4), inset 0 0 15px rgba(0,0,0,1);
+        }
+        .parliament-content {
+            background: repeating-linear-gradient(0deg, #141414, #141414 2px, #1a1a1a 2px, #1a1a1a 4px);
+            padding: 25px; border: 1px solid #333; margin: 2px;
+        }
+        .chart-container { position: relative; width: 100%; height: auto; margin-bottom: 40px; }
+        #parliament-svg { width: 100%; height: auto; display: block; overflow: visible; }
+        
+        .bottom-section { display: flex; gap: 20px; align-items: flex-start; margin-top: 15px; }
+        .party-list-compact { flex: 1.1; display: flex; flex-direction: column; gap: 8px; }
+        .party-item-compact { display: flex; align-items: center; gap: 10px; }
+        .party-item-compact img { width: 24px; height: 24px; object-fit: contain; filter: drop-shadow(1px 1px 1px #000); }
+        .party-item-compact span { font-size: 18px; text-shadow: 1px 1px 1px #000; }
+        
+        .party-info-box { flex: 0.9; border: 2px solid #a832a8; box-shadow: 0 0 10px rgba(168, 50, 168, 0.7); background: #000; display: flex; flex-direction: column; padding: 3px; }
+        .info-title { background: #111; color: #ddd; font-size: 15px; padding: 6px 8px; border-bottom: 1px solid #333; }
+        .info-image-container { width: 100%; height: 110px; background: #222; border-bottom: 1px solid #333; }
+        .info-image-container img { width: 100%; height: 100%; object-fit: cover; }
+        .info-desc { font-size: 13px; color: #aaa; padding: 8px; line-height: 1.5; text-align: justify; height: 90px; overflow-y: hidden; word-break: break-all; }
+
+        .coalition-badge { background: #b8860b; color: #fff; border: 1px solid #ffd700; font-size: 12px; padding: 2px 6px; margin-left: 8px; border-radius: 2px; text-shadow: none; display: inline-block; }
+        .coalition-summary { font-size: 18px; color: #ffd700; border-bottom: 1px dashed #555; padding-bottom: 8px; margin-bottom: 8px; text-shadow: 1px 1px 1px #000; font-weight: bold; }
+
+        /* 모바일 화면 (작은 화면) 축소 로직 */
+        @media (max-width: 650px) {
+            .input-row { flex-direction: column; }
+            #capture-area { padding: 10px; }
+            .leader-box { width: 120px; }
+            .ideology-box { width: 160px; }
+            .pie-container { width: 80px; height: 80px; }
+            .pie-ring { width: 90px; height: 90px; }
+            .pie-chart { width: 80px; height: 80px; }
+            .bottom-section { flex-direction: column; }
+            .data-action-row { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 좌측 설정 패널 -->
+<div class="controls-panel">
+    <h2>TFR 통합 UI 설정</h2>
+    
+    <!-- 정치 창 제어부 -->
+    <div class="control-group">
+        <h3>[정치 창 설정]</h3>
+        <div class="input-row">
+            <div class="input-box">
+                <label>지도자 이름</label>
+                <input type="text" id="input-leader-name" value="김재연" oninput="document.getElementById('ui-leader-name').innerText=this.value">
+            </div>
+            <div class="input-box">
+                <label>포커스 (국가 중점)</label>
+                <input type="text" id="input-focus-name" value="왕국 지원" oninput="document.getElementById('ui-focus-name').innerText=this.value">
+            </div>
+            <div class="input-box">
+                <label>이념</label>
+                <input type="text" id="input-ideology" value="진보적 민주주의" oninput="document.getElementById('ui-ideology').innerText=this.value">
+            </div>
+        </div>
+        
+        <div class="input-row">
+            <div class="input-box" style="flex: 0 0 auto;">
+                <label>지도자 사진 (4:5)</label>
+                <label class="square-file-upload" style="width: 80px; height: 100px;">
+                    <input type="file" accept="image/*" onchange="handleFileUploadGlobal(event, 'ui-leader-img', 'preview-ui-leader-img')">
+                    <span>+</span>
+                    <img id="preview-ui-leader-img" src="" alt="">
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- 국회 창 & 정당 제어부 -->
+    <div class="control-group" style="padding-bottom:0; border:none; background:transparent; margin-bottom:5px;">
+        <h3 style="color:#d95a2b; border-color:#d95a2b;">[국회 및 정당 설정]</h3>
+    </div>
+    
+    <button class="btn-add" onclick="addParty()">+ 새 정당 추가</button>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>상세표시</th>
+                    <th>연립</th>
+                    <th>정당명</th>
+                    <th>색상</th>
+                    <th>의석</th>
+                    <th>로고</th>
+                    <th>상세 사진</th>
+                    <th>상세 설명</th>
+                    <th>삭제</th>
+                </tr>
+            </thead>
+            <tbody id="controls-tbody">
+                <!-- JS 렌더링 -->
+            </tbody>
+        </table>
+    </div>
+
+    <div class="data-action-row">
+        <button class="btn-save-json" onclick="saveDataAsJSON()">💾 데이터 저장 (JSON)</button>
+        <label for="load-json-input" class="btn-load-json">📂 데이터 불러오기</label>
+        <input type="file" id="load-json-input" accept=".json" style="display:none;" onchange="loadDataFromJSON(event)">
+    </div>
+
+    <button class="btn-save" onclick="saveImage()">📸 통합 화면 이미지 저장</button>
+</div>
+
+<!-- 우측 캡처 패널 (통합 레이아웃) -->
+<div id="capture-area">
+    
+    <!-- 1. 정치 창 -->
+    <div class="hoi4-window politics-window">
+        <div class="hoi4-header">
+            <div class="header-title">정치</div>
+            <div class="header-btn">X</div>
+        </div>
+        <div class="politics-content">
+            <div class="politics-top">
+                <div class="leader-box">
+                    <img id="ui-leader-img" class="leader-img" src="" alt="Leader">
+                    <div class="leader-name" id="ui-leader-name">김재연</div>
+                </div>
+                <div class="focus-box">
+                    <!-- 🔥 자유로운 비율로 튀어나오는 중점 칸 🔥 -->
+                    <div class="focus-current">
+                        <div class="focus-text" id="ui-focus-name">왕국 지원</div>
+                        <div class="focus-progress"><div class="focus-progress-fill"></div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="politics-bottom">
+                <div class="ideology-box">
+                    <div class="ideo-title" id="ui-ideology">진보적 민주주의</div>
+                    <div class="ideo-sub"><div class="ideo-icon"></div>자유시장 자본주의</div>
+                    <div class="ideo-sub"><div class="ideo-icon"></div>대통령제 공화정</div>
+                </div>
+                <div class="party-box">
+                    <div class="pie-container">
+                        <div class="pie-ring"></div>
+                        <div class="pie-chart" id="ui-pie-chart"></div>
+                    </div>
+                    <div class="party-list-sm" id="ui-party-list">
+                        <!-- JS 렌더링 (소형) -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. 국회 창 -->
+    <div class="hoi4-window parliament-window">
+        <div class="hoi4-header">
+            <div class="header-title">
+                <img class="header-icon" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Emblem_of_the_National_Assembly_of_Korea.svg/3840px-Emblem_of_the_National_Assembly_of_Korea.svg.png" crossorigin="anonymous" alt="icon">
+                국회
+            </div>
+            <div class="header-btn">ᐱ</div>
+        </div>
+        <div class="parliament-content">
+            <div class="chart-container">
+                <svg id="parliament-svg" viewBox="0 0 600 300"></svg>
+            </div>
+            <div class="bottom-section" id="bottom-section-container">
+                <!-- JS 렌더링 (리스트 & 정보박스) -->
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let partyIdCounter = 6;
+    let parties = [];
+    let selectedPartyId = 3; 
+
+    function generateSampleImage(text, color) {
+        let canvas = document.createElement('canvas');
+        canvas.width = 120; canvas.height = 120;
+        let ctx = canvas.getContext('2d');
+        ctx.fillStyle = color;
+        ctx.fillRect(0, 0, 120, 120);
+        if (text) {
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '60px RoundedFixedsys, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, 60, 65);
+        }
+        return canvas.toDataURL('image/png');
+    }
+
+    window.onload = () => {
+        document.getElementById('ui-leader-img').style.backgroundColor = "#222";
+        document.getElementById('preview-ui-leader-img').style.backgroundColor = "#222";
+        
+        const defaultImage = generateSampleImage('', '#333'); 
+        
+        parties = [
+            { id: 1, name: "민주당계 정당", color: "#0055b3", seats: 183, isCoalition: true, logoUrl: generateSampleImage('', 'transparent'), infoImageUrl: defaultImage, description: "민주당계 정당에 대한 설명입니다." },
+            { id: 2, name: "보수 정당", color: "#cc1122", seats: 121, isCoalition: false, logoUrl: generateSampleImage('', 'transparent'), infoImageUrl: defaultImage, description: "보수 정당에 대한 설명입니다." },
+            { id: 3, name: "진보 정당", color: "#aa2244", seats: 57, isCoalition: true, logoUrl: generateSampleImage('', 'transparent'), infoImageUrl: defaultImage, description: "진보 정당들은 노동 운동, 사회 운동, 민중 운동을 기반으로 등장한 정당들입니다. 이들은 공통적으로 사회민주주의 및 민주사회주의에 기반한 좌파적 노선을 주장하고 있습니다." },
+            { id: 4, name: "제3지대 정당", color: "#cc5500", seats: 28, isCoalition: false, logoUrl: generateSampleImage('', 'transparent'), infoImageUrl: defaultImage, description: "제3지대 정당에 대한 설명입니다." },
+            { id: 5, name: "무소속", color: "#888888", seats: 1, isCoalition: false, logoUrl: generateSampleImage('', 'transparent'), infoImageUrl: defaultImage, description: "무소속 의원들에 대한 설명입니다." }
+        ];
+        renderControls();
+        renderDashboard();
+    };
+
+    function handleFileUploadGlobal(event, targetId, previewId) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imgData = e.target.result;
+                const uiImg = document.getElementById(targetId);
+                if(uiImg) {
+                    uiImg.src = imgData;
+                    uiImg.style.display = "block";
+                    uiImg.style.backgroundColor = "transparent";
+                }
+                const previewImg = document.getElementById(previewId);
+                if(previewImg) {
+                    previewImg.src = imgData;
+                    previewImg.style.display = "block";
+                    previewImg.style.backgroundColor = "transparent";
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function addParty() {
+        parties.push({
+            id: partyIdCounter++,
+            name: "새 정당", color: "#666666", seats: 10, isCoalition: false,
+            logoUrl: generateSampleImage('', 'transparent'),
+            infoImageUrl: generateSampleImage('', '#333'),
+            description: "새로운 정당에 대한 설명입니다."
+        });
+        renderControls();
+        renderDashboard();
+    }
+
+    function removeParty(id) {
+        parties = parties.filter(p => p.id !== id);
+        if (selectedPartyId === id && parties.length > 0) selectedPartyId = parties[0].id;
+        renderControls();
+        renderDashboard();
+    }
+
+    function selectPartyInfo(id) {
+        selectedPartyId = id;
+        renderControls(); 
+        renderDashboard();
+    }
+
+    function handleFileUpload(event, id, field) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                updateParty(id, field, e.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function updateParty(id, field, value) {
+        const party = parties.find(p => p.id === id);
+        if (party) {
+            party[field] = field === 'seats' ? (parseInt(value) || 0) : value;
+            renderDashboard();
+        }
+    }
+
+    function renderControls() {
+        const tbody = document.getElementById('controls-tbody');
+        tbody.innerHTML = '';
+        parties.forEach(p => {
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><input type="checkbox" onchange="selectPartyInfo(${p.id})" ${selectedPartyId === p.id ? 'checked' : ''}></td>
+                <td><input type="checkbox" onchange="updateParty(${p.id}, 'isCoalition', this.checked)" ${p.isCoalition ? 'checked' : ''}></td>
+                <td><input type="text" value="${p.name}" onchange="updateParty(${p.id}, 'name', this.value)" onkeyup="updateParty(${p.id}, 'name', this.value)"></td>
+                <td><input type="color" value="${p.color}" onchange="updateParty(${p.id}, 'color', this.value)"></td>
+                <td><input type="number" value="${p.seats}" onchange="updateParty(${p.id}, 'seats', this.value)" onkeyup="updateParty(${p.id}, 'seats', this.value)"></td>
+                <td>
+                    <label class="square-file-upload">
+                        <input type="file" accept="image/*" onchange="handleFileUpload(event, ${p.id}, 'logoUrl')">
+                        <span>+</span>
+                        <img src="${p.logoUrl}" alt="로고">
+                    </label>
+                </td>
+                <td>
+                    <label class="square-file-upload">
+                        <input type="file" accept="image/*" onchange="handleFileUpload(event, ${p.id}, 'infoImageUrl')">
+                        <span>+</span>
+                        <img src="${p.infoImageUrl}" alt="사진">
+                    </label>
+                </td>
+                <td><textarea onchange="updateParty(${p.id}, 'description', this.value)" onkeyup="updateParty(${p.id}, 'description', this.value)">${p.description}</textarea></td>
+                <td><button class="btn-del" onclick="removeParty(${p.id})">X</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function polarToCartesian(centerX, centerY, radius, angleInRadians) {
+        return { x: centerX + (radius * Math.cos(angleInRadians)), y: centerY - (radius * Math.sin(angleInRadians)) };
+    }
+
+    function describeArc(x, y, innerRadius, outerRadius, startAngle, endAngle) {
+        var startOut = polarToCartesian(x, y, outerRadius, startAngle);
+        var endOut = polarToCartesian(x, y, outerRadius, endAngle);
+        var endIn = polarToCartesian(x, y, innerRadius, endAngle);
+        var startIn = polarToCartesian(x, y, innerRadius, startAngle);
+        var d = [ "M", startOut.x, startOut.y, "A", outerRadius, outerRadius, 0, 0, 1, endOut.x, endOut.y, "L", endIn.x, endIn.y, "A", innerRadius, innerRadius, 0, 0, 0, startIn.x, startIn.y, "Z" ].join(" ");
+        return d;
+    }
+
+    function renderDashboard() {
+        let totalSeats = parties.reduce((sum, p) => sum + p.seats, 0);
+
+        const pie = document.getElementById('ui-pie-chart');
+        const smList = document.getElementById('ui-party-list');
+        smList.innerHTML = '';
+        let currentPieAngle = 0;
+        let gradientParts = [];
+
+        parties.forEach(p => {
+            if(p.seats <= 0) return;
+            let percentage = (p.seats / totalSeats) * 100;
+            gradientParts.push(`${p.color} ${currentPieAngle}% ${currentPieAngle + percentage}%`);
+            currentPieAngle += percentage;
+
+            smList.innerHTML += `
+                <div class="party-row-sm">
+                    <div class="party-color-box" style="background-color: ${p.color};"></div>
+                    ${p.name} (${p.seats})
+                    ${p.isCoalition ? '<span class="coalition-badge">여당</span>' : ''}
+                </div>
+            `;
+        });
+        pie.style.background = `conic-gradient(${gradientParts.join(', ')})`;
+
+        const svg = document.getElementById('parliament-svg');
+        const bottomContainer = document.getElementById('bottom-section-container');
+        
+        svg.innerHTML = `
+            <defs>
+                <radialGradient id="emblem-bg" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#3d1b1b" />
+                    <stop offset="100%" stop-color="#120606" />
+                </radialGradient>
+                <filter id="shadow">
+                    <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.8"/>
+                </filter>
+            </defs>
+        `;
+
+        const bgPathD = describeArc(300, 290, 80, 280, Math.PI, 0);
+        svg.innerHTML += `<path d="${bgPathD}" fill="#1c1c1c" stroke="#000" stroke-width="2" />`;
+
+        if (totalSeats > 0) {
+            let currentAngle = Math.PI;
+
+            parties.forEach(p => {
+                if (p.seats <= 0) return;
+                let sliceAngle = (p.seats / totalSeats) * Math.PI;
+                let endAngle = currentAngle - sliceAngle;
+                let pathD = describeArc(300, 290, 80, 280, currentAngle, endAngle);
+                
+                let sliceId = `slice-${p.id}`;
+                svg.innerHTML += `<path id="${sliceId}" d="${pathD}" fill="${p.color}" stroke="${p.isCoalition ? '#ffd700' : '#111'}" stroke-width="${p.isCoalition ? '4' : '2'}" />`;
+
+                let clipId = `clip-${p.id}`;
+                svg.innerHTML += `<clipPath id="${clipId}"><path d="${pathD}" /></clipPath>`;
+
+                let midAngle = currentAngle - (sliceAngle / 2);
+                let midRadius = 180;
+                let logoCenterX = 300 + (midRadius * Math.cos(midAngle));
+                let logoCenterY = 290 - (midRadius * Math.sin(midAngle));
+                let logoSize = 160; 
+                
+                svg.innerHTML += `
+                    <image href="${p.logoUrl}" 
+                           x="${logoCenterX - logoSize/2}" y="${logoCenterY - logoSize/2}" 
+                           width="${logoSize}" height="${logoSize}" 
+                           clip-path="url(#${clipId})" opacity="0.15" preserveAspectRatio="xMidYMid slice" />
+                `;
+                currentAngle = endAngle;
+            });
+        }
+
+        svg.innerHTML += `
+            <line x1="300" y1="10" x2="300" y2="210" stroke="#ccc" stroke-width="1.5" />
+            <polygon points="293,10 307,10 300,25" fill="#ccc" stroke="#000" stroke-width="1" />
+            <line x1="20" y1="290" x2="218" y2="290" stroke="#050505" stroke-width="8" />
+            <line x1="382" y1="290" x2="580" y2="290" stroke="#050505" stroke-width="8" />
+            <line x1="20" y1="290" x2="218" y2="290" stroke="#333" stroke-width="2" />
+            <line x1="382" y1="290" x2="580" y2="290" stroke="#333" stroke-width="2" />
+            <path d="M 218 290 A 82 82 0 0 1 382 290" fill="none" stroke="#050505" stroke-width="6" />
+            <path d="M 218 290 A 82 82 0 0 1 382 290" fill="none" stroke="#222" stroke-width="2" />
+            <circle cx="300" cy="290" r="48" fill="url(#emblem-bg)" stroke="#050505" stroke-width="3" filter="url(#shadow)" />
+            <circle cx="300" cy="290" r="45" fill="none" stroke="#555" stroke-width="1.5" />
+            <image href="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Emblem_of_the_National_Assembly_of_Korea.svg/3840px-Emblem_of_the_National_Assembly_of_Korea.svg.png" 
+                   crossorigin="anonymous"
+                   x="262" y="252" width="76" height="76" preserveAspectRatio="xMidYMid meet" 
+                   style="filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.7)) brightness(0.8) sepia(0.3);" />
+        `;
+
+        let coalitionSeats = parties.filter(p => p.isCoalition).reduce((sum, p) => sum + p.seats, 0);
+        let coalitionPct = totalSeats > 0 ? ((coalitionSeats / totalSeats) * 100).toFixed(1) : 0;
+
+        let leftListHtml = '<div class="party-list-compact">';
+        leftListHtml += `<div class="coalition-summary">👑 연립정부 의석: ${coalitionSeats}석 (${coalitionPct}%)</div>`;
+        parties.forEach(p => {
+            leftListHtml += `
+                <div class="party-item-compact">
+                    <img src="${p.logoUrl}" alt="logo">
+                    <span style="color: ${p.color};">${p.name} (${p.seats}석)</span>
+                    ${p.isCoalition ? '<span class="coalition-badge">여당</span>' : ''}
+                </div>
+            `;
+        });
+        leftListHtml += '</div>';
+
+        let rightInfoBoxHtml = '';
+        const selectedParty = parties.find(p => p.id === selectedPartyId);
+        if (selectedParty) {
+            rightInfoBoxHtml = `
+                <div class="party-info-box">
+                    <div class="info-title">${selectedParty.name}</div>
+                    <div class="info-image-container">
+                        <img src="${selectedParty.infoImageUrl}" alt="info-image">
+                    </div>
+                    <div class="info-desc">
+                        ${selectedParty.description}
+                    </div>
+                </div>
+            `;
+        }
+
+        bottomContainer.innerHTML = leftListHtml + rightInfoBoxHtml;
+    }
+
+    function saveDataAsJSON() {
+        const data = {
+            leaderName: document.getElementById('input-leader-name').value,
+            focusName: document.getElementById('input-focus-name').value,
+            ideology: document.getElementById('input-ideology').value,
+            leaderImg: document.getElementById('ui-leader-img').src,
+            selectedPartyId: selectedPartyId,
+            parties: parties
+        };
+        
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "TFR_시뮬레이터_데이터.json");
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+    }
+
+    function loadDataFromJSON(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+
+                if (data.leaderName !== undefined) {
+                    document.getElementById('input-leader-name').value = data.leaderName;
+                    document.getElementById('ui-leader-name').innerText = data.leaderName;
+                }
+                if (data.focusName !== undefined) {
+                    document.getElementById('input-focus-name').value = data.focusName;
+                    document.getElementById('ui-focus-name').innerText = data.focusName;
+                }
+                if (data.ideology !== undefined) {
+                    document.getElementById('input-ideology').value = data.ideology;
+                    document.getElementById('ui-ideology').innerText = data.ideology;
+                }
+                if (data.leaderImg !== undefined) {
+                    document.getElementById('ui-leader-img').src = data.leaderImg;
+                    document.getElementById('preview-ui-leader-img').src = data.leaderImg;
+                    document.getElementById('preview-ui-leader-img').style.display = "block";
+                    if (data.leaderImg && !data.leaderImg.includes('empty')) {
+                        document.getElementById('ui-leader-img').style.backgroundColor = "transparent";
+                        document.getElementById('preview-ui-leader-img').style.backgroundColor = "transparent";
+                    }
+                }
+
+                if (data.parties && Array.isArray(data.parties)) {
+                    parties = data.parties;
+                    partyIdCounter = Math.max(0, ...parties.map(p => p.id)) + 1;
+                }
+                if (data.selectedPartyId !== undefined) {
+                    selectedPartyId = data.selectedPartyId;
+                }
+
+                renderControls();
+                renderDashboard();
+                alert("데이터를 성공적으로 불러왔습니다!");
+            } catch (error) {
+                alert("올바르지 않은 JSON 파일입니다.");
+            }
+            
+            event.target.value = '';
+        };
+        reader.readAsText(file);
+    }
+
+    function saveImage() {
+        const captureArea = document.getElementById('capture-area');
+        html2canvas(captureArea, {
+            useCORS: true,           
+            backgroundColor: "#0a0a0a", 
+            scale: 2                 
+        }).then(canvas => {
+            let link = document.createElement('a');
+            link.download = 'TFR_통합_시뮬레이션.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+    }
+</script>
+
+</body>
+</html>
