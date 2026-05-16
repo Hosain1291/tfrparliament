@@ -112,8 +112,8 @@
         .input-box label { color: #888; font-size: 14px; }
         
         .table-responsive { width: 100%; overflow-x: auto; margin-bottom: 20px; -webkit-overflow-scrolling: touch; }
-        table { width: 100%; min-width: 950px; border-collapse: collapse; background: #111; }
-        th, td { border: 1px solid #2a2a2a; padding: 12px; text-align: center; font-size: 14px; vertical-align: middle; }
+        table { width: 100%; min-width: 1000px; border-collapse: collapse; background: #111; }
+        th, td { border: 1px solid #2a2a2a; padding: 10px; text-align: center; font-size: 14px; vertical-align: middle; }
         th { background: #222; color: #fff; font-weight: normal; }
 
         input[type="text"], input[type="number"], textarea {
@@ -125,14 +125,14 @@
         }
         input:focus { border-color: var(--tfr-pink); }
         textarea { resize: vertical; height: 60px; }
-        input[type="color"] { width: 50px; height: 40px; padding: 0; border: none; cursor: pointer; background: none; }
+        input[type="color"] { width: 45px; height: 35px; padding: 0; border: none; cursor: pointer; background: none; }
         
         .square-file-upload {
             display: inline-flex;
             justify-content: center;
             align-items: center;
-            width: 50px;
-            height: 50px;
+            width: 44px;
+            height: 44px;
             background-color: #050505;
             border: 2px dashed #555;
             cursor: pointer;
@@ -143,7 +143,7 @@
         .square-file-upload.dragover { border-color: var(--tfr-pink); background: #222; transform: scale(1.05); }
         .square-file-upload input[type="file"] { display: none; }
         .square-file-upload img { width: 100%; height: 100%; object-fit: contain; position: absolute; z-index: 1; pointer-events: none; }
-        .square-file-upload span { font-size: 24px; color: #444; z-index: 0; }
+        .square-file-upload span { font-size: 20px; color: #444; z-index: 0; }
         .square-file-upload::after {
             content: "UP"; position: absolute; bottom: 0; left: 0; width: 100%;
             background: rgba(0,0,0,0.8); color: #fff; font-size: 10px; text-align: center;
@@ -155,9 +155,12 @@
             width: 24px; height: 24px; cursor: pointer; accent-color: var(--tfr-gold); 
         }
 
-        button { font-family: 'NeoDonggeunmo', sans-serif; background: #2a2a2a; color: #fff; border: 1px solid #444; padding: 10px 15px; cursor: pointer; font-size: 16px; transition: 0.2s;}
+        button { font-family: 'NeoDonggeunmo', sans-serif; background: #2a2a2a; color: #fff; border: 1px solid #444; padding: 8px 12px; cursor: pointer; font-size: 14px; transition: 0.2s;}
         button:hover { background: #3a3a3a; border-color: #666; }
         
+        .btn-move { background: #111; padding: 4px 8px; font-size: 12px; border-color: #333; margin: 0 2px; }
+        .btn-move:disabled { opacity: 0.2; cursor: default; }
+
         .btn-add { background: #004422; width: 100%; font-size: 18px; margin-bottom: 10px; padding: 15px; border-color: #00aa44;}
         .btn-del { background: #440000; border-color: #aa0000; padding: 5px 10px; }
         .btn-simulate { background: #664400; border-color: var(--tfr-gold); width: 100%; margin-top: 10px; font-size: 18px; padding: 15px; }
@@ -373,6 +376,7 @@
             <table>
                 <thead>
                     <tr>
+                        <th>순서</th>
                         <th>상세</th>
                         <th>연립</th>
                         <th>정당명</th>
@@ -507,6 +511,22 @@
         renderDashboard();
     }
 
+    function moveParty(id, direction) {
+        const index = parties.findIndex(p => p.id === id);
+        if (index < 0) return;
+        
+        if (direction === 'up' && index > 0) {
+            [parties[index], parties[index - 1]] = [parties[index - 1], parties[index]];
+        } else if (direction === 'down' && index < parties.length - 1) {
+            [parties[index], parties[index + 1]] = [parties[index + 1], parties[index]];
+        } else {
+            return;
+        }
+        
+        renderControls();
+        renderDashboard();
+    }
+
     function setupDragAndDrop(elementId, callback) {
         const zone = document.getElementById(elementId);
         if (!zone) return;
@@ -608,9 +628,13 @@
     function renderControls() {
         const tbody = document.getElementById('controls-tbody');
         tbody.innerHTML = '';
-        parties.forEach(p => {
+        parties.forEach((p, index) => {
             let tr = document.createElement('tr');
             tr.innerHTML = `
+                <td>
+                    <button class="btn-move" onclick="moveParty(${p.id}, 'up')" ${index === 0 ? 'disabled' : ''}>▲</button>
+                    <button class="btn-move" onclick="moveParty(${p.id}, 'down')" ${index === parties.length - 1 ? 'disabled' : ''}>▼</button>
+                </td>
                 <td><input type="checkbox" class="square-check" onchange="selectPartyInfo(${p.id})" ${selectedPartyId === p.id ? 'checked' : ''}></td>
                 <td><input type="checkbox" onchange="updateParty(${p.id}, 'isCoalition', this.checked)" ${p.isCoalition ? 'checked' : ''}></td>
                 <td><input type="text" value="${p.name}" oninput="updateParty(${p.id}, 'name', this.value)"></td>
@@ -685,7 +709,7 @@
             });
         }
 
-        // 🔥 과반수(50%) 기준선 및 삼각형 지표 🔥
+        // 과반수(50%) 기준선 및 삼각형 지표
         const showMajorityLine = document.getElementById('input-show-majority-line').checked;
         if (showMajorityLine) {
             svg.innerHTML += `
