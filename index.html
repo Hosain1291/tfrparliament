@@ -309,25 +309,25 @@
         <div class="input-row">
             <div class="input-box">
                 <label>지도자 이름</label>
-                <input type="text" id="input-leader-name" value="김재연" oninput="document.getElementById('ui-leader-name').innerText=this.value || '[지도자 이름]'">
+                <input type="text" id="input-leader-name" value="홍길동" oninput="document.getElementById('ui-leader-name').innerText=this.value || '[지도자 이름]'">
             </div>
             <div class="input-box">
                 <label>국가 중점 명칭</label>
-                <input type="text" id="input-focus-name" value="왕국 지원" oninput="document.getElementById('ui-focus-name').innerText=this.value || '[국가 중점]'">
+                <input type="text" id="input-focus-name" value="중점 명칭" oninput="document.getElementById('ui-focus-name').innerText=this.value || '[국가 중점]'">
             </div>
         </div>
         <div class="input-row">
             <div class="input-box">
                 <label>주 이념</label>
-                <input type="text" id="input-ideology" value="진보적 민주주의" oninput="document.getElementById('ui-ideology').innerText=this.value || '[이념]'">
+                <input type="text" id="input-ideology" value="주 이념 입력" oninput="document.getElementById('ui-ideology').innerText=this.value || '[이념]'">
             </div>
             <div class="input-box">
                 <label>하위 이념 1 수정</label>
-                <input type="text" id="input-sub-ideo-1-name" value="자유시장 자본주의" oninput="document.getElementById('ui-sub-ideo-1').innerText=this.value">
+                <input type="text" id="input-sub-ideo-1-name" value="하위 이념 1 입력" oninput="document.getElementById('ui-sub-ideo-1').innerText=this.value">
             </div>
             <div class="input-box">
                 <label>하위 이념 2 수정</label>
-                <input type="text" id="input-sub-ideo-2-name" value="대통령제 공화정" oninput="document.getElementById('ui-sub-ideo-2').innerText=this.value">
+                <input type="text" id="input-sub-ideo-2-name" value="하위 이념 2 입력" oninput="document.getElementById('ui-sub-ideo-2').innerText=this.value">
             </div>
         </div>
         
@@ -548,9 +548,9 @@
         document.getElementById('ui-leader-img').style.backgroundColor = "#222";
         
         parties = [
-            { id: 1, name: "민주당계 정당", color: "#0055b3", seats: 183, support: 45.2, errorMargin: 3.5, isCoalition: true, logoUrl: '', infoImageUrl: '', description: "민주당계 정당에 대한 설명입니다." },
-            { id: 2, name: "보수 정당", color: "#cc1122", seats: 121, support: 38.5, errorMargin: 4.2, isCoalition: false, logoUrl: '', infoImageUrl: '', description: "보수 정당에 대한 설명입니다." },
-            { id: 3, name: "진보 정당", color: "#aa2244", seats: 57, support: 11.3, errorMargin: 2.1, isCoalition: true, logoUrl: '', infoImageUrl: '', description: "진보 정당들은 노동 운동 기반의 정당들입니다." }
+            { id: 1, name: "정당 1", color: "#e3a857", seats: 100, support: 45.2, errorMargin: 3.5, isCoalition: true, logoUrl: '', infoImageUrl: '', description: "정당에 대한 설명입니다." },
+            { id: 2, name: "정당 2", color: "#cc1122", seats: 100, support: 38.5, errorMargin: 4.2, isCoalition: false, logoUrl: '', infoImageUrl: '', description: "정당에 대한 설명입니다." },
+            { id: 3, name: "정당 3", color: "#aa2244", seats: 100, support: 11.3, errorMargin: 2.1, isCoalition: true, logoUrl: '', infoImageUrl: '', description: "정당들은 노동 운동 기반의 정당들입니다." }
         ];
 
         setupDragAndDrop('drop-leader', (data) => {
