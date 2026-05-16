@@ -420,7 +420,7 @@
                 <thead>
                     <tr>
                         <th>순서</th>
-                        <th>상세</th>
+                        <th>상세표시</th>
                         <th>집권(여당)</th>
                         <th>정당명</th>
                         <th>색상</th>
@@ -428,13 +428,28 @@
                         <th>오차(%)</th>
                         <th>의석(하원)</th>
                         <th class="bicameral-only" style="display: none;">의석(상원)</th>
-                        <th>로고</th>
-                        <th>상세사진</th>
-                        <th>상세설명</th>
                         <th>삭제</th>
                     </tr>
                 </thead>
                 <tbody id="controls-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 정당 부가 정보 설정 (전체 표 형식) -->
+    <div class="control-group" style="border-color: #44aa44;">
+        <h3 style="color: #44aa44;">[4] 정당 부가 정보 설정</h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 15%;">정당명</th>
+                        <th style="width: 15%;">로고</th>
+                        <th style="width: 15%;">상세사진</th>
+                        <th style="width: 55%;">상세설명</th>
+                    </tr>
+                </thead>
+                <tbody id="details-tbody"></tbody>
             </table>
         </div>
     </div>
@@ -549,6 +564,24 @@
     let parliamentType = "단원제"; // 단원제 or 양원제
     let govType = "coalition"; // coalition or single
 
+    // 드래그 앤 드롭 공통 유틸리티 함수
+    function setupDragAndDrop(elementId, callback) {
+        const zone = document.getElementById(elementId);
+        if (!zone) return;
+        zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('dragover'); });
+        zone.addEventListener('dragleave', () => { zone.classList.remove('dragover'); });
+        zone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            zone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (ev) => callback(ev.target.result);
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
     // 국회 형태(단원/양원) 업데이트
     function updateParliamentType(val) {
         parliamentType = val;
@@ -578,6 +611,7 @@
 
         renderControls();
         renderDashboard();
+        renderDetailsTable();
     }
 
     // 정부 형태(연립/단독) 업데이트
@@ -685,57 +719,8 @@
         
         renderControls();
         renderDashboard();
+        renderDetailsTable();
     }
-
-    function setupDragAndDrop(elementId, callback) {
-        const zone = document.getElementById(elementId);
-        if (!zone) return;
-        zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('dragover'); });
-        zone.addEventListener('dragleave', () => { zone.classList.remove('dragover'); });
-        zone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            zone.classList.remove('dragover');
-            const file = e.dataTransfer.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (ev) => callback(ev.target.result);
-                reader.readAsDataURL(file);
-            }
-        });
-    }
-
-    window.onload = () => {
-        document.getElementById('ui-leader-img').style.backgroundColor = "#222";
-        
-        parties = [
-            { id: 1, name: "정당 1", color: "#e3a857", seats: 100, seatsUpper: 33, support: 45.2, errorMargin: 3.5, isCoalition: true, logoUrl: '', infoImageUrl: '', description: "정당에 대한 설명입니다." },
-            { id: 2, name: "정당 2", color: "#cc1122", seats: 100, seatsUpper: 33, support: 38.5, errorMargin: 4.2, isCoalition: true, logoUrl: '', infoImageUrl: '', description: "정당에 대한 설명입니다." },
-            { id: 3, name: "정당 3", color: "#aa2244", seats: 100, seatsUpper: 34, support: 11.3, errorMargin: 2.1, isCoalition: false, logoUrl: '', infoImageUrl: '', description: "정당들은 노동 운동 기반의 정당들입니다." }
-        ];
-
-        setupDragAndDrop('drop-leader', (data) => {
-            const uiImg = document.getElementById('ui-leader-img');
-            uiImg.src = data; uiImg.style.display = "block"; uiImg.style.backgroundColor = "transparent";
-            document.getElementById('preview-ui-leader-img').src = data;
-        });
-
-        setupDragAndDrop('drop-parliament', (data) => {
-            parliamentIconUrl = data;
-            document.getElementById('preview-parliament-icon').src = data;
-            document.getElementById('ui-parliament-icon-small').src = data;
-            renderDashboard(); 
-        });
-
-        setupDragAndDrop('drop-parliament-upper', (data) => {
-            upperParliamentIconUrl = data;
-            document.getElementById('preview-parliament-icon-upper').src = data;
-            document.getElementById('ui-parliament-icon-small-upper').src = data;
-            renderDashboard(); 
-        });
-
-        renderControls();
-        renderDashboard();
-    };
 
     function handleFileUploadGlobal(event, targetId, previewId) {
         const file = event.target.files[0];
@@ -761,15 +746,33 @@
         }
     }
 
+    // 표 4의 행마다 첨부파일 업로드할 때 호출되는 함수
+    function handleRowFileUpload(event, id, field) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => { 
+                updateParty(id, field, e.target.result); 
+                renderDetailsTable(); // 표 4 재렌더링
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
     function addParty() {
         parties.push({ id: partyIdCounter++, name: "새 정당", color: "#666666", seats: 0, seatsUpper: 0, support: 0, errorMargin: 5.0, isCoalition: false, logoUrl: '', infoImageUrl: '', description: "" });
-        renderControls(); renderDashboard();
+        renderControls(); 
+        renderDashboard();
+        renderDetailsTable();
     }
 
     function removeParty(id) {
         parties = parties.filter(p => p.id !== id);
         if (selectedPartyId === id && parties.length > 0) selectedPartyId = parties[0].id;
-        renderControls(); renderDashboard();
+        else if (parties.length === 0) selectedPartyId = null;
+        renderControls(); 
+        renderDashboard(); 
+        renderDetailsTable();
     }
 
     function selectPartyInfo(id) { 
@@ -782,18 +785,53 @@
         const party = parties.find(p => p.id === id);
         if (party) {
             party[field] = (field === 'seats' || field === 'seatsUpper' || field === 'support' || field === 'errorMargin') ? (parseFloat(value) || 0) : value;
+            
+            // 이름이 변경된 경우 4번 표의 이름 텍스트만 교체하여 깜빡임 방지
+            if (field === 'name') {
+                const detailNameTd = document.getElementById(`detail-name-${id}`);
+                if (detailNameTd) detailNameTd.innerText = value;
+            }
+            
             renderDashboard();
         }
     }
 
-    function handleRowFileUpload(event, id, field) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => { updateParty(id, field, e.target.result); renderControls(); };
-            reader.readAsDataURL(file);
-        }
-    }
+    // 초기 이벤트 리스너 바인딩 및 데이터 설정
+    window.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('ui-leader-img').style.backgroundColor = "#222";
+        
+        parties = [
+            { id: 1, name: "정당 1", color: "#e3a857", seats: 100, seatsUpper: 33, support: 45.2, errorMargin: 3.5, isCoalition: true, logoUrl: '', infoImageUrl: '', description: "정당에 대한 설명입니다." },
+            { id: 2, name: "정당 2", color: "#cc1122", seats: 100, seatsUpper: 33, support: 38.5, errorMargin: 4.2, isCoalition: true, logoUrl: '', infoImageUrl: '', description: "정당에 대한 설명입니다." },
+            { id: 3, name: "정당 3", color: "#aa2244", seats: 100, seatsUpper: 34, support: 11.3, errorMargin: 2.1, isCoalition: false, logoUrl: '', infoImageUrl: '', description: "정당들은 노동 운동 기반의 정당들입니다." }
+        ];
+
+        // 초기 드래그 앤 드롭 영역 바인딩
+        setupDragAndDrop('drop-leader', (data) => {
+            const uiImg = document.getElementById('ui-leader-img');
+            uiImg.src = data; uiImg.style.display = "block"; uiImg.style.backgroundColor = "transparent";
+            document.getElementById('preview-ui-leader-img').src = data;
+        });
+
+        setupDragAndDrop('drop-parliament', (data) => {
+            parliamentIconUrl = data;
+            document.getElementById('preview-parliament-icon').src = data;
+            document.getElementById('ui-parliament-icon-small').src = data;
+            renderDashboard(); 
+        });
+
+        setupDragAndDrop('drop-parliament-upper', (data) => {
+            upperParliamentIconUrl = data;
+            document.getElementById('preview-parliament-icon-upper').src = data;
+            document.getElementById('ui-parliament-icon-small-upper').src = data;
+            renderDashboard(); 
+        });
+
+        // 초기 화면 그리기
+        renderControls();
+        renderDashboard();
+        renderDetailsTable();
+    });
 
     function renderControls() {
         const tbody = document.getElementById('controls-tbody');
@@ -814,24 +852,59 @@
                     <button class="btn-move" onclick="moveParty(${p.id}, 'up')" ${index === 0 ? 'disabled' : ''}>▲</button>
                     <button class="btn-move" onclick="moveParty(${p.id}, 'down')" ${index === parties.length - 1 ? 'disabled' : ''}>▼</button>
                 </td>
-                <td><input type="checkbox" class="square-check" onchange="selectPartyInfo(${p.id})" ${selectedPartyId === p.id ? 'checked' : ''}></td>
+                <td><input type="checkbox" class="square-check" title="시각화 영역에 상세 정보 표시" onchange="selectPartyInfo(${p.id})" ${selectedPartyId === p.id ? 'checked' : ''}></td>
                 <td>${rulingInputHtml}</td>
-                <td><input type="text" value="${p.name}" oninput="updateParty(${p.id}, 'name', this.value)"></td>
+                <td><input type="text" value="${p.name}" oninput="updateParty(${p.id}, 'name', this.value);"></td>
                 <td><input type="color" value="${p.color}" onchange="updateParty(${p.id}, 'color', this.value)"></td>
                 <td><input type="number" value="${p.support}" step="0.1" oninput="updateParty(${p.id}, 'support', this.value)"></td>
                 <td><input type="number" value="${p.errorMargin}" step="0.1" oninput="updateParty(${p.id}, 'errorMargin', this.value)"></td>
                 <td><input type="number" value="${p.seats}" oninput="updateParty(${p.id}, 'seats', this.value)"></td>
                 <td class="bicameral-only" style="${upperStyle}"><input type="number" value="${p.seatsUpper || 0}" oninput="updateParty(${p.id}, 'seatsUpper', this.value)"></td>
-                <td><label class="square-file-upload" id="drop-logo-${p.id}"><input type="file" accept="image/*" onchange="handleRowFileUpload(event, ${p.id}, 'logoUrl')"><span>+</span><img src="${p.logoUrl || ''}" style="${p.logoUrl ? '' : 'display:none'}"></label></td>
-                <td><label class="square-file-upload" id="drop-info-${p.id}"><input type="file" accept="image/*" onchange="handleRowFileUpload(event, ${p.id}, 'infoImageUrl')"><span>+</span><img src="${p.infoImageUrl || ''}" style="${p.infoImageUrl ? '' : 'display:none'}"></label></td>
-                <td><textarea oninput="updateParty(${p.id}, 'description', this.value)">${p.description || ''}</textarea></td>
                 <td><button class="btn-del" onclick="removeParty(${p.id})">X</button></td>
             `;
             tbody.appendChild(tr);
+        });
+    }
 
+    // 4번 창 정당 부가 정보 표 렌더링
+    function renderDetailsTable() {
+        const tbody = document.getElementById('details-tbody');
+        tbody.innerHTML = '';
+        
+        parties.forEach((p) => {
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td id="detail-name-${p.id}">${p.name}</td>
+                <td>
+                    <label class="square-file-upload" id="drop-detail-logo-${p.id}">
+                        <input type="file" accept="image/*" onchange="handleRowFileUpload(event, ${p.id}, 'logoUrl')">
+                        <span>+</span>
+                        <img src="${p.logoUrl || ''}" style="${p.logoUrl ? '' : 'display:none'}">
+                    </label>
+                </td>
+                <td>
+                    <label class="square-file-upload" id="drop-detail-info-${p.id}">
+                        <input type="file" accept="image/*" onchange="handleRowFileUpload(event, ${p.id}, 'infoImageUrl')">
+                        <span>+</span>
+                        <img src="${p.infoImageUrl || ''}" style="${p.infoImageUrl ? '' : 'display:none'}">
+                    </label>
+                </td>
+                <td>
+                    <textarea oninput="updateParty(${p.id}, 'description', this.value)">${p.description || ''}</textarea>
+                </td>
+            `;
+            tbody.appendChild(tr);
+
+            // 각 요소에 드래그 앤 드롭 이벤트를 바인딩하기 위해 약간의 지연 처리
             setTimeout(() => {
-                setupDragAndDrop(`drop-logo-${p.id}`, (data) => { updateParty(p.id, 'logoUrl', data); renderControls(); });
-                setupDragAndDrop(`drop-info-${p.id}`, (data) => { updateParty(p.id, 'infoImageUrl', data); renderControls(); });
+                setupDragAndDrop(`drop-detail-logo-${p.id}`, (data) => { 
+                    updateParty(p.id, 'logoUrl', data); 
+                    renderDetailsTable(); 
+                });
+                setupDragAndDrop(`drop-detail-info-${p.id}`, (data) => { 
+                    updateParty(p.id, 'infoImageUrl', data); 
+                    renderDetailsTable(); 
+                });
             }, 0);
         });
     }
@@ -1065,7 +1138,7 @@
                 if(d.totalSeatsUpper) document.getElementById('input-total-seats-upper').value = d.totalSeatsUpper;
 
                 parties = d.parties; selectedPartyId = d.selectedPartyId;
-                renderControls(); renderDashboard(); alert("데이터 로드 완료");
+                renderControls(); renderDashboard(); renderDetailsTable(); alert("데이터 로드 완료");
             } catch(e) { alert("로드 실패: 잘못된 파일입니다."); }
             event.target.value = '';
         };
