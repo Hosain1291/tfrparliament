@@ -1124,6 +1124,15 @@
                     document.getElementById('input-show-majority-line').checked = d.showMajorityLine;
                 }
                 
+                if(d.lowerName) { 
+                    lowerName = d.lowerName; 
+                    document.getElementById('input-lower-name').value = lowerName; 
+                }
+                if(d.upperName) { 
+                    upperName = d.upperName; 
+                    document.getElementById('input-upper-name').value = upperName; 
+                }
+
                 // 단원/양원, 단독/연립 데이터 로드
                 if(d.parliamentType) {
                     parliamentType = d.parliamentType;
