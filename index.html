@@ -363,7 +363,7 @@
                 </label>
             </div>
             <div class="input-box bicameral-only" style="flex: 0 0 auto; display: none;">
-                <label>상원 로고 (드래그)</label>
+                <label id="label-parliament-logo-upper">상원 로고 (드래그)</label>
                 <label class="square-file-upload" id="drop-parliament-upper" style="width: 80px; height: 80px; border-color: var(--tfr-gold);">
                     <input type="file" accept="image/*" onchange="handleFileUploadGlobal(event, 'ui-parliament-icon-svg-upper', 'preview-parliament-icon-upper')">
                     <span>+</span>
@@ -390,6 +390,22 @@
                     <label><input type="radio" name="gov-type" value="coalition" checked onchange="updateGovType(this.value)"> 연립 정부 (다중 선택)</label>
                     <label><input type="radio" name="gov-type" value="single" onchange="updateGovType(this.value)"> 단독 집권 (단일 선택)</label>
                 </div>
+            </div>
+        </div>
+
+        <!-- 명칭 설정 UI 추가됨 -->
+        <div class="input-row" style="margin-top: 15px;">
+            <div class="input-box unicameral-only">
+                <label>국회 명칭 (단원제)</label>
+                <input type="text" id="input-single-name" value="국회" oninput="updateHouseName('single', this.value)">
+            </div>
+            <div class="input-box bicameral-only" style="display: none;">
+                <label>하원 명칭 (양원제)</label>
+                <input type="text" id="input-lower-name" value="하원" oninput="updateHouseName('lower', this.value)">
+            </div>
+            <div class="input-box bicameral-only" style="display: none;">
+                <label>상원 명칭 (양원제)</label>
+                <input type="text" id="input-upper-name" value="상원" oninput="updateHouseName('upper', this.value)">
             </div>
         </div>
 
@@ -542,7 +558,7 @@
                 <div class="chart-container">
                     <svg id="parliament-svg-upper" viewBox="0 0 600 300"></svg>
                 </div>
-                <!-- 하단 요약과 정보 박스가 들어가는 하단 구역 (완전 동일하게 유지) -->
+                <!-- 하단 요약과 정보 박스가 들어가는 하단 구역 -->
                 <div class="bottom-section">
                     <div id="coalition-summary-area-upper"></div>
                     <div class="lower-info-row">
@@ -556,15 +572,7 @@
 </div>
 
 <script>
-    let partyIdCounter = 10;
-    let parties = [];
-    let selectedPartyId = 3; 
-    let parliamentIconUrl = "https://cdn-icons-png.flaticon.com/512/5455/5455402.png";
-    let upperParliamentIconUrl = "https://cdn-icons-png.flaticon.com/512/5455/5455402.png";
-    let parliamentType = "단원제"; // 단원제 or 양원제
-    let govType = "coalition"; // coalition or single
-
-    // 드래그 앤 드롭 공통 유틸리티 함수
+    // 드래그 앤 드롭 공통 유틸리티 함수 - 항상 최상단에 선언하여 ReferenceError 방지
     function setupDragAndDrop(elementId, callback) {
         const zone = document.getElementById(elementId);
         if (!zone) return;
@@ -582,33 +590,73 @@
         });
     }
 
+    let partyIdCounter = 10;
+    let parties = [];
+    let selectedPartyId = 3; 
+    let parliamentIconUrl = "https://cdn-icons-png.flaticon.com/512/5455/5455402.png";
+    let upperParliamentIconUrl = "https://cdn-icons-png.flaticon.com/512/5455/5455402.png";
+    let parliamentType = "단원제"; // 단원제 or 양원제
+    let govType = "coalition"; // coalition or single
+    
+    // 국회 명칭 관련 변수 추가
+    let singleName = "국회";
+    let lowerName = "하원";
+    let upperName = "상원";
+
+    function updateHouseName(type, val) {
+        if (type === 'single') singleName = val || '국회';
+        if (type === 'lower') lowerName = val || '하원';
+        if (type === 'upper') upperName = val || '상원';
+        
+        updateLabelsAndButtons();
+        renderDashboard();
+    }
+
+    function updateLabelsAndButtons() {
+        const label = document.getElementById('label-parliament-logo');
+        const labelUpper = document.getElementById('label-parliament-logo-upper');
+        const btnSaveLower = document.getElementById('btn-save-lower');
+        const btnSaveUpper = document.getElementById('btn-save-upper');
+
+        if (parliamentType === '양원제') {
+            label.innerText = `${lowerName} 로고 (드래그)`;
+            if(labelUpper) labelUpper.innerText = `${upperName} 로고 (드래그)`;
+            
+            btnSaveLower.innerText = `${lowerName} 화면 이미지 저장`;
+            btnSaveLower.setAttribute('onclick', `saveImage('window-lower', '${lowerName}')`);
+            
+            if(btnSaveUpper) {
+                btnSaveUpper.innerText = `${upperName} 화면 이미지 저장`;
+                btnSaveUpper.setAttribute('onclick', `saveImage('window-upper', '${upperName}')`);
+            }
+        } else {
+            label.innerText = `${singleName} 로고 (드래그)`;
+            btnSaveLower.innerText = `${singleName} 화면 이미지 저장`;
+            btnSaveLower.setAttribute('onclick', `saveImage('window-lower', '${singleName}')`);
+        }
+    }
+
     // 국회 형태(단원/양원) 업데이트
     function updateParliamentType(val) {
         parliamentType = val;
         
-        // 로고 라벨 텍스트 및 저장 버튼 변경
-        const label = document.getElementById('label-parliament-logo');
-        const btnSaveLower = document.getElementById('btn-save-lower');
-        if (val === '양원제') {
-            label.innerText = '하원 로고 (드래그)';
-            btnSaveLower.innerText = '하원 화면 이미지 저장';
-            btnSaveLower.setAttribute('onclick', "saveImage('window-lower', '하원')");
-        } else {
-            label.innerText = '국회 로고 (드래그)';
-            btnSaveLower.innerText = '국회 화면 이미지 저장';
-            btnSaveLower.setAttribute('onclick', "saveImage('window-lower', '국회')");
-        }
-
-        // 양원제 전용 UI 표시/숨김 처리
+        // 양원제 및 단원제 전용 UI 표시/숨김 처리
         const bicameralElements = document.querySelectorAll('.bicameral-only');
         bicameralElements.forEach(el => {
-            if (val === '양원제') {
-                el.style.display = (el.tagName === 'TH' || el.tagName === 'TD') ? 'table-cell' : (el.classList.contains('input-box') ? 'flex' : 'block');
+            el.style.display = (el.tagName === 'TH' || el.tagName === 'TD') ? 'table-cell' : (el.classList.contains('input-box') ? 'flex' : 'block');
+            if (val !== '양원제') el.style.display = 'none';
+        });
+
+        const unicameralElements = document.querySelectorAll('.unicameral-only');
+        unicameralElements.forEach(el => {
+            if (val === '단원제') {
+                el.style.display = el.classList.contains('input-box') ? 'flex' : 'block';
             } else {
                 el.style.display = 'none';
             }
         });
 
+        updateLabelsAndButtons();
         renderControls();
         renderDashboard();
         renderDetailsTable();
@@ -828,6 +876,7 @@
         });
 
         // 초기 화면 그리기
+        updateLabelsAndButtons();
         renderControls();
         renderDashboard();
         renderDetailsTable();
@@ -999,8 +1048,17 @@
         const parliamentHeaderTitle = document.getElementById('ui-parliament-header-title');
         parliamentHeaderTitle.innerHTML = `
             <img id="ui-parliament-icon-small" class="header-icon" src="${parliamentIconUrl}" crossorigin="anonymous" alt="icon">
-            ${parliamentType === '양원제' ? '하원' : '국회'}
+            ${parliamentType === '양원제' ? lowerName : singleName}
         `;
+
+        // 상원 창 헤더 업데이트
+        const parliamentHeaderTitleUpper = document.getElementById('ui-parliament-header-title-upper');
+        if (parliamentHeaderTitleUpper) {
+            parliamentHeaderTitleUpper.innerHTML = `
+                <img id="ui-parliament-icon-small-upper" class="header-icon" src="${upperParliamentIconUrl}" crossorigin="anonymous" alt="icon">
+                ${upperName}
+            `;
+        }
 
         // 하단 요약 (하원)
         const rulingParties = parties.filter(p => p.isCoalition);
@@ -1078,6 +1136,9 @@
             showMajorityLine: document.getElementById('input-show-majority-line').checked,
             parliamentType: parliamentType,
             govType: govType,
+            singleName: singleName,
+            lowerName: lowerName,
+            upperName: upperName,
             totalSeatsLower: document.getElementById('input-total-seats-target').value,
             totalSeatsUpper: document.getElementById('input-total-seats-upper').value,
             selectedPartyId, parties
@@ -1124,6 +1185,10 @@
                     document.getElementById('input-show-majority-line').checked = d.showMajorityLine;
                 }
                 
+                if(d.singleName) { 
+                    singleName = d.singleName; 
+                    document.getElementById('input-single-name').value = singleName; 
+                }
                 if(d.lowerName) { 
                     lowerName = d.lowerName; 
                     document.getElementById('input-lower-name').value = lowerName; 
@@ -1147,7 +1212,12 @@
                 if(d.totalSeatsUpper) document.getElementById('input-total-seats-upper').value = d.totalSeatsUpper;
 
                 parties = d.parties; selectedPartyId = d.selectedPartyId;
-                renderControls(); renderDashboard(); renderDetailsTable(); alert("데이터 로드 완료");
+                
+                updateLabelsAndButtons();
+                renderControls(); 
+                renderDashboard(); 
+                renderDetailsTable(); 
+                alert("데이터 로드 완료");
             } catch(e) { alert("로드 실패: 잘못된 파일입니다."); }
             event.target.value = '';
         };
