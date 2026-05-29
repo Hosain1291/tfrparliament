@@ -3,9 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TFR 국회 시뮬레이터</title>
+    <title>TFR 국회 시뮬레이터 - Ultimate Edition</title>
+    
+    <!-- html2canvas 라이브러리: 화면을 이미지로 저장하기 위해 필요합니다 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
     <style>
+        /* 
+         * ==========================================
+         * 1. 폰트 및 기본 변수 설정
+         * ==========================================
+         */
         @font-face {
             font-family: 'NeoDonggeunmo';
             src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.3/NeoDunggeunmo.woff') format('woff');
@@ -14,17 +22,36 @@
         }
 
         :root {
+            /* TFRKP 테마 컬러 정의 */
             --tfr-pink: #ff0077;
+            --tfr-pink-glow: rgba(255, 0, 119, 0.4);
+            
             --tfr-gold: #d95a2b;
+            --tfr-gold-glow: rgba(217, 90, 43, 0.4);
+            
             --tfr-purple: #a832a8;
+            --tfr-purple-glow: rgba(168, 50, 168, 0.7);
+            
+            --tfr-blue: #00aaff;
+            --tfr-green: #44aa44;
+            
+            /* 배경 및 UI 컬러 */
             --tfr-bg: #0a0a0a;
+            --tfr-panel-bg: #151515;
             --tfr-input-bg: #050505;
+            --tfr-border: #444444;
+            --tfr-text-main: #dddddd;
+            --tfr-text-muted: #888888;
         }
 
-        /* 전체 레이아웃 */
+        /* 
+         * ==========================================
+         * 2. 전역 및 레이아웃 스타일
+         * ==========================================
+         */
         body {
             background-color: var(--tfr-bg);
-            color: #ddd;
+            color: var(--tfr-text-main);
             font-family: 'NeoDonggeunmo', sans-serif;
             margin: 0 auto;
             padding: 20px 10px;
@@ -35,10 +62,12 @@
             width: 100%;
             max-width: 1800px;
             box-sizing: border-box;
+            /* 스캔라인 효과를 위한 배경 패턴 */
             background-image: linear-gradient(rgba(18, 18, 18, 0.5) 50%, transparent 50%);
             background-size: 100% 4px;
         }
 
+        /* 데스크탑 화면에서의 가로 배치 레이아웃 */
         @media (min-width: 1100px) {
             body {
                 flex-direction: row; 
@@ -56,43 +85,66 @@
             }
         }
 
+        /* 
+         * ==========================================
+         * 3. 좌측 설정 패널 스타일
+         * ==========================================
+         */
         .controls-panel {
-            background: #151515;
-            border: 2px solid #444;
+            background: var(--tfr-panel-bg);
+            border: 2px solid var(--tfr-border);
             padding: 20px;
             box-shadow: 6px 6px 0 #000;
             width: 100%;
             box-sizing: border-box;
             max-height: 95vh;
             overflow-y: auto;
+            /* 모바일 부드러운 스크롤 */
             -webkit-overflow-scrolling: touch;
         }
 
+        /* 메인 타이틀 */
         .controls-panel h2 {
             margin-top: 0;
-            color: #fff;
+            color: #ffffff;
             text-align: center;
-            border-bottom: 2px dashed #333;
-            padding-bottom: 10px;
-            font-size: 28px;
+            border-bottom: 2px dashed #333333;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            font-size: 32px;
             letter-spacing: 2px;
+            text-shadow: 2px 2px 0px #000;
         }
 
+        /* 컨트롤 그룹 (각 섹션) 박스 */
         .control-group {
             margin-bottom: 25px;
             background: #1e1e1e;
             padding: 20px;
-            border: 1px solid #333;
+            border: 1px solid #333333;
+            border-radius: 4px;
+            transition: border-color 0.3s;
         }
 
+        .control-group:hover {
+            border-color: #555555;
+        }
+
+        /* 섹션별 서브 타이틀 */
         .control-group h3 {
             margin-top: 0;
             color: var(--tfr-pink);
-            border-bottom: 1px solid #444;
+            border-bottom: 1px solid #444444;
             padding-bottom: 10px;
-            font-size: 20px;
+            font-size: 22px;
+            letter-spacing: 1px;
         }
 
+        /* 
+         * ==========================================
+         * 4. 입력 폼 (Input Forms) 스타일
+         * ==========================================
+         */
         .input-row {
             display: flex;
             gap: 15px;
@@ -108,141 +160,512 @@
             min-width: 140px; 
         }
 
-        .input-box label { color: #888; font-size: 14px; }
+        .input-box label { 
+            color: var(--tfr-text-muted); 
+            font-size: 14px; 
+            font-weight: bold;
+        }
         
         .radio-group {
             display: flex;
             gap: 15px;
             margin-top: 5px;
+            background: #111;
+            padding: 10px;
+            border: 1px solid #333;
+            border-radius: 4px;
         }
         
         .radio-group label {
-            color: #fff;
+            color: #ffffff;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
             font-size: 16px;
         }
 
-        .table-responsive { width: 100%; overflow-x: auto; margin-bottom: 20px; -webkit-overflow-scrolling: touch; }
-        table { width: 100%; min-width: 1000px; border-collapse: collapse; background: #111; }
-        th, td { border: 1px solid #2a2a2a; padding: 10px; text-align: center; font-size: 14px; vertical-align: middle; }
-        th { background: #222; color: #fff; font-weight: normal; }
-
-        input[type="text"], input[type="number"], textarea {
-            width: 100%; background: var(--tfr-input-bg); 
+        /* 기본 입력 요소 (텍스트, 숫자, 텍스트에어리어, 셀렉트) */
+        input[type="text"], 
+        input[type="number"], 
+        textarea, 
+        select {
+            width: 100%; 
+            background: var(--tfr-input-bg); 
             color: #ffffff; 
-            border: 1px solid #333;
-            font-family: 'NeoDonggeunmo', sans-serif; padding: 10px; box-sizing: border-box; 
-            font-size: 16px; outline: none;
+            border: 1px solid #333333;
+            border-radius: 4px;
+            font-family: 'NeoDonggeunmo', sans-serif; 
+            padding: 12px; 
+            box-sizing: border-box; 
+            font-size: 16px; 
+            outline: none;
+            transition: all 0.2s;
         }
-        input:focus { border-color: var(--tfr-pink); }
-        textarea { resize: vertical; height: 60px; }
-        input[type="color"] { width: 45px; height: 35px; padding: 0; border: none; cursor: pointer; background: none; }
+
+        input[type="text"]:focus, 
+        input[type="number"]:focus, 
+        textarea:focus, 
+        select:focus { 
+            border-color: var(--tfr-pink); 
+            box-shadow: 0 0 5px var(--tfr-pink-glow);
+        }
+
+        textarea { 
+            resize: vertical; 
+            height: 80px; 
+        }
+
+        /* 컬러 피커 스타일 수정 */
+        input[type="color"] { 
+            width: 50px; 
+            height: 40px; 
+            padding: 0; 
+            border: 1px solid #444; 
+            border-radius: 4px;
+            cursor: pointer; 
+            background: #000; 
+        }
+
+        /* 체크박스/라디오 크기 키우기 */
+        input[type="checkbox"], 
+        input[type="radio"], 
+        input.square-check { 
+            width: 22px; 
+            height: 22px; 
+            cursor: pointer; 
+            accent-color: var(--tfr-gold); 
+        }
+
+        /* 
+         * ==========================================
+         * 5. 버튼 스타일 
+         * ==========================================
+         */
+        button { 
+            font-family: 'NeoDonggeunmo', sans-serif; 
+            background: #2a2a2a; 
+            color: #ffffff; 
+            border: 1px solid #444444; 
+            border-radius: 4px;
+            padding: 10px 15px; 
+            cursor: pointer; 
+            font-size: 15px; 
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        button:hover { 
+            background: #3a3a3a; 
+            border-color: #666666; 
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
         
+        .btn-move { 
+            background: #111111; 
+            padding: 6px 10px; 
+            font-size: 12px; 
+            border-color: #333333; 
+            margin: 0 2px; 
+        }
+
+        .btn-move:disabled { 
+            opacity: 0.3; 
+            cursor: not-allowed; 
+        }
+
+        /* 기능별 특수 버튼 */
+        .btn-add { 
+            background: #004422; 
+            width: 100%; 
+            font-size: 18px; 
+            margin-bottom: 15px; 
+            padding: 15px; 
+            border: 1px solid #00aa44;
+            border-radius: 6px;
+        }
+
+        .btn-add:hover {
+            background: #005522;
+            box-shadow: 0 0 10px rgba(0, 170, 68, 0.4);
+        }
+
+        .btn-del { 
+            background: #550000; 
+            border-color: #aa0000; 
+            padding: 6px 12px; 
+            border-radius: 4px;
+        }
+        
+        .btn-del:hover {
+            background: #770000;
+        }
+
+        .btn-simulate { 
+            background: #664400; 
+            border: 1px solid var(--tfr-gold); 
+            width: 100%; 
+            margin-top: 15px; 
+            font-size: 18px; 
+            padding: 15px; 
+            border-radius: 6px;
+        }
+        
+        .btn-simulate:hover {
+            background: #775500;
+            box-shadow: 0 0 10px var(--tfr-gold-glow);
+        }
+        
+        /* 하단 저장/불러오기 버튼 영역 */
+        .data-action-row { 
+            display: flex; 
+            gap: 15px; 
+            margin-top: 30px; 
+            flex-wrap: wrap; 
+        }
+
+        .btn-save-json { 
+            flex: 1; 
+            background: #220044; 
+            border: 1px solid var(--tfr-purple); 
+            font-size: 18px; 
+            padding: 18px; 
+            min-width: 200px; 
+            border-radius: 6px;
+        }
+        
+        .btn-save-json:hover {
+            box-shadow: 0 0 10px var(--tfr-purple-glow);
+        }
+
+        .btn-load-json { 
+            flex: 1; 
+            background: #003333; 
+            border: 1px solid #00aaaa; 
+            font-size: 18px; 
+            padding: 18px; 
+            cursor: pointer; 
+            text-align: center; 
+            color: #ffffff; 
+            min-width: 200px; 
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .btn-load-json:hover {
+            background: #004444;
+            box-shadow: 0 0 10px rgba(0, 170, 170, 0.4);
+        }
+
+        .save-btn-row { 
+            display: flex; 
+            gap: 15px; 
+            width: 100%; 
+            margin-top: 20px; 
+        }
+
+        .btn-save { 
+            background: #002266; 
+            flex: 1; 
+            font-size: 20px; 
+            padding: 22px; 
+            border: 1px solid #0044cc; 
+            box-shadow: 0 0 10px rgba(0, 68, 204, 0.5); 
+            color: #ffffff; 
+            cursor: pointer; 
+            text-align: center; 
+            border-radius: 6px;
+            letter-spacing: 1px;
+        }
+
+        .btn-save:hover {
+            background: #003388;
+            box-shadow: 0 0 15px rgba(0, 68, 204, 0.8); 
+        }
+
+        /* 
+         * ==========================================
+         * 6. 이미지 업로드 (드래그 앤 드롭 영역)
+         * ==========================================
+         */
         .square-file-upload {
             display: inline-flex;
             justify-content: center;
             align-items: center;
-            width: 44px;
-            height: 44px;
+            width: 50px;
+            height: 50px;
             background-color: #050505;
-            border: 2px dashed #555;
+            border: 2px dashed #666666;
+            border-radius: 6px;
             cursor: pointer;
             position: relative;
             overflow: hidden;
-            transition: all 0.2s;
+            transition: all 0.2s ease-in-out;
         }
-        .square-file-upload.dragover { border-color: var(--tfr-pink); background: #222; transform: scale(1.05); }
-        .square-file-upload input[type="file"] { display: none; }
-        .square-file-upload img { width: 100%; height: 100%; object-fit: contain; position: absolute; z-index: 1; pointer-events: none; }
-        .square-file-upload span { font-size: 20px; color: #444; z-index: 0; }
+
+        .square-file-upload:hover {
+            border-color: #999999;
+            background-color: #111111;
+        }
+
+        .square-file-upload.dragover { 
+            border-color: var(--tfr-pink); 
+            background: rgba(255, 0, 119, 0.1); 
+            transform: scale(1.05); 
+        }
+
+        .square-file-upload input[type="file"] { 
+            display: none; 
+        }
+
+        .square-file-upload img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: contain; 
+            position: absolute; 
+            z-index: 1; 
+            pointer-events: none; 
+        }
+
+        .square-file-upload span { 
+            font-size: 24px; 
+            color: #555555; 
+            z-index: 0; 
+        }
+
         .square-file-upload::after {
-            content: "UP"; position: absolute; bottom: 0; left: 0; width: 100%;
-            background: rgba(0,0,0,0.8); color: #fff; font-size: 10px; text-align: center;
-            padding: 2px 0; opacity: 0; transition: opacity 0.2s; z-index: 2;
+            content: "UP"; 
+            position: absolute; 
+            bottom: 0; 
+            left: 0; 
+            width: 100%;
+            background: rgba(0, 0, 0, 0.85); 
+            color: #ffffff; 
+            font-size: 11px; 
+            text-align: center;
+            padding: 4px 0; 
+            opacity: 0; 
+            transition: opacity 0.2s; 
+            z-index: 2;
         }
-        .square-file-upload:hover::after { opacity: 1; }
 
-        input[type="checkbox"], input[type="radio"], input.square-check { 
-            width: 20px; height: 20px; cursor: pointer; accent-color: var(--tfr-gold); 
+        .square-file-upload:hover::after { 
+            opacity: 1; 
         }
 
-        button { font-family: 'NeoDonggeunmo', sans-serif; background: #2a2a2a; color: #fff; border: 1px solid #444; padding: 8px 12px; cursor: pointer; font-size: 14px; transition: 0.2s;}
-        button:hover { background: #3a3a3a; border-color: #666; }
-        
-        .btn-move { background: #111; padding: 4px 8px; font-size: 12px; border-color: #333; margin: 0 2px; }
-        .btn-move:disabled { opacity: 0.2; cursor: default; }
+        /* 
+         * ==========================================
+         * 7. 테이블 스타일 
+         * ==========================================
+         */
+        .table-responsive { 
+            width: 100%; 
+            overflow-x: auto; 
+            margin-bottom: 20px; 
+            -webkit-overflow-scrolling: touch; 
+            border: 1px solid #333;
+            border-radius: 4px;
+        }
 
-        .btn-add { background: #004422; width: 100%; font-size: 18px; margin-bottom: 10px; padding: 15px; border-color: #00aa44;}
-        .btn-del { background: #440000; border-color: #aa0000; padding: 5px 10px; }
-        .btn-simulate { background: #664400; border-color: var(--tfr-gold); width: 100%; margin-top: 10px; font-size: 18px; padding: 15px; }
-        
-        .btn-save { background: #002266; flex: 1; font-size: 20px; padding: 20px; border-color: #0044cc; box-shadow: 0 0 10px rgba(0,68,204,0.5); color: #fff; cursor: pointer; text-align: center; }
-        .save-btn-row { display: flex; gap: 10px; width: 100%; margin-top: 10px; }
+        table { 
+            width: 100%; 
+            min-width: 1050px; 
+            border-collapse: collapse; 
+            background: #111111; 
+        }
 
-        .data-action-row { display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
-        .btn-save-json { flex: 1; background: #220044; border-color: var(--tfr-purple); font-size: 18px; padding: 15px; min-width: 200px; }
-        .btn-load-json { flex: 1; background: #003333; border: 1px solid #00aaaa; font-size: 18px; padding: 15px; cursor: pointer; text-align: center; color: #fff; min-width: 200px; }
+        th, td { 
+            border: 1px solid #2a2a2a; 
+            padding: 12px; 
+            text-align: center; 
+            font-size: 14px; 
+            vertical-align: middle; 
+        }
 
+        th { 
+            background: #222222; 
+            color: #ffffff; 
+            font-weight: normal; 
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        tr:nth-child(even) {
+            background: #151515;
+        }
+
+        tr:hover {
+            background: #1a1a1a;
+        }
+
+        /* 
+         * ==========================================
+         * 8. 우측 결과 캡처 영역 (HOI4 UI)
+         * ==========================================
+         */
         .capture-wrapper {
             width: 100%;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
-            padding-bottom: 15px;
+            padding-bottom: 20px;
         }
 
         #capture-area {
             display: flex;
             flex-direction: column;
-            gap: 20px;
-            padding: 25px;
+            gap: 25px;
+            padding: 30px;
             background: #050505;
+            /* 디자인 요소: 격자무늬 패턴 추가 */
             background-image: 
                 linear-gradient(rgba(255, 0, 119, 0.05) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255, 0, 119, 0.05) 1px, transparent 1px);
             background-size: 20px 20px;
-            border: 2px solid #222;
+            border: 2px solid #222222;
             width: 650px;
             min-width: 650px;   
             box-sizing: border-box;
             margin: 0 auto;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
         }
 
-        .hoi4-window { width: 100%; background: rgba(15, 15, 15, 0.95); position: relative; }
+        /* 윈도우 공통 베이스 */
+        .hoi4-window { 
+            width: 100%; 
+            background: rgba(15, 15, 15, 0.98); 
+            position: relative; 
+            border-radius: 2px;
+        }
 
+        /* 창 헤더 스타일 (클래식 게임 UI 느낌) */
         .hoi4-header {
-            background: linear-gradient(to bottom, #444 0%, #111 100%);
-            border-bottom: 2px solid #000;
-            border-top: 1px solid #666;
-            padding: 8px 12px;
+            background: linear-gradient(to bottom, #444444 0%, #111111 100%);
+            border-bottom: 2px solid #000000;
+            border-top: 1px solid #666666;
+            padding: 10px 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .header-title { color: #fff; font-size: 18px; text-shadow: 2px 2px 2px #000; font-weight: bold; display: flex; align-items: center; gap: 8px; }
-        .header-icon { width: 24px; height: 24px; object-fit: contain; border: 1px solid #000; border-radius: 50%; background: #222; }
-        .header-btn { border: 1px solid #555; background: #222; color: #fff; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; }
 
+        .header-title { 
+            color: #ffffff; 
+            font-size: 19px; 
+            text-shadow: 2px 2px 2px #000000; 
+            font-weight: bold; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            letter-spacing: 1px;
+        }
+
+        .header-icon { 
+            width: 26px; 
+            height: 26px; 
+            object-fit: contain; 
+            border: 1px solid #000000; 
+            border-radius: 50%; 
+            background: #222222; 
+        }
+
+        .header-btn { 
+            border: 1px solid #555555; 
+            background: #222222; 
+            color: #ffffff; 
+            width: 26px; 
+            height: 26px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 12px; 
+            cursor: pointer; 
+            box-shadow: inset 1px 1px 0 rgba(255,255,255,0.2);
+        }
+
+        /* 
+         * ==========================================
+         * 9. 정치 창 상세 구성
+         * ==========================================
+         */
         .politics-window {
             border: 2px solid var(--tfr-pink);
-            box-shadow: 0 0 15px rgba(255,0,119,0.4), inset 0 0 15px rgba(0,0,0,1);
+            box-shadow: 0 0 15px var(--tfr-pink-glow), inset 0 0 15px rgba(0,0,0,1);
         }
-        .politics-content { padding: 20px; display: flex; flex-direction: column; gap: 20px; }
-        .politics-top { display: flex; gap: 15px; position: relative;}
+
+        .politics-content { 
+            padding: 25px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 25px; 
+        }
+
+        .politics-top { 
+            display: flex; 
+            gap: 20px; 
+            position: relative;
+        }
         
-        .leader-box { display: flex; flex-direction: column; width: 160px; border: 2px solid #444; background: #000; flex-shrink: 0; position: relative; z-index: 1;}
-        .leader-img { width: 100%; aspect-ratio: 4 / 5; height: auto; object-fit: cover; }
-        .leader-name { background: #222; color: #fff; text-align: center; padding: 6px; font-size: 16px; border-top: 2px solid #444; }
+        /* 지도자 박스 */
+        .leader-box { 
+            display: flex; 
+            flex-direction: column; 
+            width: 170px; 
+            border: 2px solid #444444; 
+            background: #000000; 
+            flex-shrink: 0; 
+            position: relative; 
+            z-index: 1;
+            box-shadow: 4px 4px 10px rgba(0,0,0,0.8);
+        }
+
+        .leader-img { 
+            width: 100%; 
+            aspect-ratio: 4 / 5; 
+            height: auto; 
+            object-fit: cover; 
+            background-color: #1a1a1a;
+        }
+
+        .leader-name { 
+            background: #222222; 
+            color: #ffffff; 
+            text-align: center; 
+            padding: 8px 6px; 
+            font-size: 17px; 
+            border-top: 2px solid #444444; 
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 0 #000;
+        }
         
-        .focus-box { flex: 1; display: flex; flex-direction: column; gap: 15px; margin-top: 5px; }
+        /* 국가 중점 박스 */
+        .focus-box { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+            margin-top: 10px; 
+        }
         
         .focus-current {
-            background: #000; border: 2px solid #1a1a1a; height: 80px; 
-            display: flex; align-items: center; justify-content: center; position: relative;
-            color: #fff; text-shadow: 0 0 5px var(--tfr-pink); font-size: 20px;
-            box-sizing: border-box; box-shadow: inset 0 0 20px rgba(0,0,0,1);
+            background: #000000; 
+            border: 2px solid #1a1a1a; 
+            height: 90px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            position: relative;
+            color: #ffffff; 
+            text-shadow: 0 0 5px var(--tfr-pink); 
+            font-size: 22px;
+            box-sizing: border-box; 
+            box-shadow: inset 0 0 20px rgba(0,0,0,1), 2px 2px 5px rgba(0,0,0,0.5);
+            letter-spacing: 1px;
         }
         
         .focus-inner-glow-frame {
@@ -258,54 +681,282 @@
         
         .focus-progress { 
             position: absolute; 
-            bottom: 8px; left: 10px; right: 10px; 
-            height: 4px; background: #222; z-index: 3; 
+            bottom: 8px; left: 12px; right: 12px; 
+            height: 6px; 
+            background: #222222; 
+            z-index: 3; 
+            border: 1px solid #000;
         }
+
         .focus-progress-fill { 
-            height: 100%; width: 75%; 
+            height: 100%; 
+            width: 75%; 
             background: linear-gradient(90deg, #8a2be2, var(--tfr-pink)); 
-            box-shadow: 0 0 8px var(--tfr-pink); 
+            box-shadow: 0 0 10px var(--tfr-pink); 
         }
 
-        .politics-bottom { display: flex; gap: 15px; align-items: stretch; }
-        .ideology-box { width: 220px; background: #0c0c0c; border: 1px solid #444; padding: 15px; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box; flex-shrink: 0; }
-        .ideo-title { font-size: 17px; color: #ccc; text-align: center; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .ideo-sub { display: flex; align-items: center; gap: 10px; font-size: 14px; color: #aaa; }
-        .ideo-icon-slot { width: 28px; height: 28px; background: transparent; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
-        
-        .party-box { flex: 1; background: #0c0c0c; border: 1px solid #444; display: flex; padding: 15px; gap: 15px; box-sizing: border-box; align-items: center;}
-        .pie-container { position: relative; width: 100px; height: 100px; display: flex; justify-content: center; align-items: center; }
-        .pie-ring { position: absolute; width: 110px; height: 110px; border-radius: 50%; border: 4px solid #444; box-shadow: 0 0 10px #000; pointer-events: none; }
-        .pie-chart { width: 100px; height: 100px; border-radius: 50%; }
-        .party-list-sm { flex: 1; display: flex; flex-direction: column; gap: 4px; }
-        .party-row-sm { display: flex; align-items: center; font-size: 13px; color: #ddd; }
-        .party-color-box { width: 12px; height: 12px; margin-right: 6px; border: 1px solid #000; }
+        /* 이념 및 정당 파이차트 영역 */
+        .politics-bottom { 
+            display: flex; 
+            gap: 20px; 
+            align-items: stretch; 
+        }
 
+        .ideology-box { 
+            width: 230px; 
+            background: #0c0c0c; 
+            border: 1px solid #444444; 
+            padding: 18px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+            box-sizing: border-box; 
+            flex-shrink: 0; 
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+        }
+
+        .ideo-title { 
+            font-size: 18px; 
+            color: #dddddd; 
+            text-align: center; 
+            border-bottom: 1px solid #333333; 
+            padding-bottom: 12px; 
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .ideo-sub { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            font-size: 15px; 
+            color: #aaaaaa; 
+        }
+        
+        .party-box { 
+            flex: 1; 
+            background: #0c0c0c; 
+            border: 1px solid #444444; 
+            display: flex; 
+            padding: 20px; 
+            gap: 20px; 
+            box-sizing: border-box; 
+            align-items: center;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+        }
+
+        /* 미니 파이차트 컴포넌트 */
+        .pie-container { 
+            position: relative; 
+            width: 110px; 
+            height: 110px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+        }
+
+        .pie-ring { 
+            position: absolute; 
+            width: 120px; 
+            height: 120px; 
+            border-radius: 50%; 
+            border: 4px solid #444444; 
+            box-shadow: 0 0 12px #000000; 
+            pointer-events: none; 
+        }
+
+        .pie-chart { 
+            width: 110px; 
+            height: 110px; 
+            border-radius: 50%; 
+        }
+
+        .party-list-sm { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 6px; 
+        }
+
+        .party-row-sm { 
+            display: flex; 
+            align-items: center; 
+            font-size: 14px; 
+            color: #dddddd; 
+        }
+
+        .party-color-box { 
+            width: 14px; 
+            height: 14px; 
+            margin-right: 8px; 
+            border: 1px solid #000000; 
+        }
+
+        /* 
+         * ==========================================
+         * 10. 국회 창 (상하원 시각화) 상세 구성
+         * ==========================================
+         */
         .parliament-window {
             border: 2px solid var(--tfr-gold); 
-            box-shadow: 0 0 15px rgba(217, 90, 43, 0.4), inset 0 0 15px rgba(0,0,0,1);
+            box-shadow: 0 0 15px var(--tfr-gold-glow), inset 0 0 15px rgba(0,0,0,1);
         }
-        .parliament-content { padding: 25px; border: 1px solid #333; margin: 2px; }
-        .chart-container { position: relative; width: 100%; height: auto; margin-bottom: 40px; }
-        #parliament-svg, #parliament-svg-upper { width: 100%; height: auto; display: block; overflow: visible; }
+
+        .parliament-content { 
+            padding: 30px; 
+            border: 1px solid #333333; 
+            margin: 3px; 
+            background: rgba(10, 10, 10, 0.5);
+        }
+
+        .chart-container { 
+            position: relative; 
+            width: 100%; 
+            height: auto; 
+            margin-bottom: 45px; 
+        }
+
+        #parliament-svg, #parliament-svg-upper { 
+            width: 100%; 
+            height: auto; 
+            display: block; 
+            overflow: visible; 
+            filter: drop-shadow(0px 10px 15px rgba(0,0,0,0.8));
+        }
         
-        .bottom-section { display: flex; gap: 20px; align-items: flex-start; margin-top: 15px; flex-direction: column; }
-        .coalition-summary { font-size: 18px; color: #ffd700; border-bottom: 1px dashed #555; padding-bottom: 8px; margin-bottom: 8px; font-weight: bold; width: 100%; }
+        .bottom-section { 
+            display: flex; 
+            gap: 20px; 
+            align-items: flex-start; 
+            margin-top: 20px; 
+            flex-direction: column; 
+        }
 
-        .lower-info-row { display: flex; width: 100%; gap: 20px; align-items: stretch; }
-        .party-list-compact { flex: 1.1; display: flex; flex-direction: column; gap: 10px; }
-        .party-item-compact { display: flex; align-items: center; gap: 12px; }
-        .party-item-compact img { width: 26px; height: 24px; object-fit: contain; filter: drop-shadow(1px 1px 1px #000); }
-        .party-item-compact span { font-size: 18px; text-shadow: 1px 1px 1px #000; }
+        /* 여당 연립/단독 요약 텍스트 */
+        .coalition-summary { 
+            font-size: 19px; 
+            color: #ffd700; 
+            border-bottom: 1px dashed #555555; 
+            padding-bottom: 10px; 
+            margin-bottom: 10px; 
+            font-weight: bold; 
+            width: 100%; 
+            text-shadow: 1px 1px 0 #000;
+            letter-spacing: 1px;
+        }
+
+        .lower-info-row { 
+            display: flex; 
+            width: 100%; 
+            gap: 25px; 
+            align-items: stretch; 
+        }
         
-        .party-info-box { flex: 0.9; border: 2px solid var(--tfr-purple); box-shadow: 0 0 10px rgba(168, 50, 168, 0.7); background: #000; display: flex; flex-direction: column; padding: 3px; min-height: 200px;}
-        .info-title { background: #111; color: #ddd; font-size: 15px; padding: 6px 8px; border-bottom: 1px solid #333; }
-        .info-image-container { width: 100%; height: 110px; background: #222; border-bottom: 1px solid #333; overflow: hidden; }
-        .info-image-container img { width: 100%; height: 100%; object-fit: cover; }
-        .info-desc { font-size: 13px; color: #aaa; padding: 8px; line-height: 1.5; text-align: justify; overflow-y: hidden; word-break: break-all; }
+        /* 좌측 의석수 리스트 */
+        .party-list-compact { 
+            flex: 1.1; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+        }
 
-        .coalition-badge { background: #b8860b; color: #fff; border: 1px solid #ffd700; font-size: 12px; padding: 2px 6px; margin-left: 8px; border-radius: 2px; }
+        .party-item-compact { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
 
+        .party-item-compact img { 
+            width: 28px; 
+            height: 26px; 
+            object-fit: contain; 
+            filter: drop-shadow(1px 1px 2px #000000); 
+        }
+
+        .party-item-compact span { 
+            font-size: 19px; 
+            text-shadow: 1px 1px 2px #000000; 
+            font-weight: 500;
+        }
+        
+        /* 우측 상세정보 박스 (포커스된 정당) */
+        .party-info-box { 
+            flex: 0.9; 
+            border: 2px solid var(--tfr-purple); 
+            box-shadow: 0 0 12px var(--tfr-purple-glow); 
+            background: #000000; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 4px; 
+            min-height: 220px;
+        }
+
+        .info-title { 
+            background: #111111; 
+            color: #dddddd; 
+            font-size: 16px; 
+            padding: 8px 10px; 
+            border-bottom: 1px solid #333333; 
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        .info-image-container { 
+            width: 100%; 
+            height: 120px; 
+            background: #1a1a1a; 
+            border-bottom: 1px solid #333333; 
+            overflow: hidden; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .info-image-container img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+        }
+
+        .info-desc { 
+            font-size: 14px; 
+            color: #bbbbbb; 
+            padding: 12px; 
+            line-height: 1.6; 
+            text-align: justify; 
+            overflow-y: hidden; 
+            word-break: break-all; 
+        }
+
+        /* 뱃지 컴포넌트 */
+        .coalition-badge { 
+            background: #b8860b; 
+            color: #ffffff; 
+            border: 1px solid #ffd700; 
+            font-size: 12px; 
+            padding: 3px 8px; 
+            margin-left: 10px; 
+            border-radius: 3px; 
+            text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+
+        .alliance-badge {
+            background: #0055aa; 
+            color: #ffffff; 
+            border: 1px solid #00aaff; 
+            font-size: 12px; 
+            padding: 3px 8px; 
+            margin-left: 6px; 
+            border-radius: 3px;
+            text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+
+        /* 반응형 스타일 */
         @media (max-width: 650px) {
             .input-row { flex-direction: column; }
             .lower-info-row { flex-direction: column; }
@@ -314,10 +965,15 @@
 </head>
 <body>
 
+<!-- 
+  ==========================================
+  좌측: 사용자가 조작하는 마스터 제어 패널
+  ==========================================
+-->
 <div class="controls-panel">
-    <h2>TFRKP 시뮬레이터 설정</h2>
+    <h2>TFRKP 시뮬레이터 마스터 설정</h2>
     
-    <!-- 정치 창 설정 -->
+    <!-- [1] 정치 창 설정 영역 -->
     <div class="control-group">
         <h3>[1] 정치 창 및 이념 설정</h3>
         <div class="input-row">
@@ -348,7 +1004,7 @@
         <div class="input-row">
             <div class="input-box" style="flex: 0 0 auto;">
                 <label>지도자 사진 (드래그)</label>
-                <label class="square-file-upload" id="drop-leader" style="width: 80px; height: 100px;">
+                <label class="square-file-upload" id="drop-leader" style="width: 85px; height: 110px;">
                     <input type="file" accept="image/*" onchange="handleFileUploadGlobal(event, 'ui-leader-img', 'preview-ui-leader-img')">
                     <span>+</span>
                     <img id="preview-ui-leader-img" src="" alt="">
@@ -356,7 +1012,7 @@
             </div>
             <div class="input-box" style="flex: 0 0 auto;">
                 <label id="label-parliament-logo">국회 로고 (드래그)</label>
-                <label class="square-file-upload" id="drop-parliament" style="width: 80px; height: 80px; border-color: var(--tfr-gold);">
+                <label class="square-file-upload" id="drop-parliament" style="width: 85px; height: 85px; border-color: var(--tfr-gold);">
                     <input type="file" accept="image/*" onchange="handleFileUploadGlobal(event, 'ui-parliament-icon-svg', 'preview-parliament-icon')">
                     <span>+</span>
                     <img id="preview-parliament-icon" src="https://cdn-icons-png.flaticon.com/512/5455/5455402.png" alt="">
@@ -364,7 +1020,7 @@
             </div>
             <div class="input-box bicameral-only" style="flex: 0 0 auto; display: none;">
                 <label id="label-parliament-logo-upper">상원 로고 (드래그)</label>
-                <label class="square-file-upload" id="drop-parliament-upper" style="width: 80px; height: 80px; border-color: var(--tfr-gold);">
+                <label class="square-file-upload" id="drop-parliament-upper" style="width: 85px; height: 85px; border-color: var(--tfr-gold);">
                     <input type="file" accept="image/*" onchange="handleFileUploadGlobal(event, 'ui-parliament-icon-svg-upper', 'preview-parliament-icon-upper')">
                     <span>+</span>
                     <img id="preview-parliament-icon-upper" src="https://cdn-icons-png.flaticon.com/512/5455/5455402.png" alt="">
@@ -373,8 +1029,9 @@
         </div>
     </div>
 
+    <!-- [2] 시뮬레이션 및 시스템 설정 영역 -->
     <div class="control-group" style="border-color: var(--tfr-gold);">
-        <h3 style="color: var(--tfr-gold);">[2] 선거 시뮬레이션 및 국회 설정</h3>
+        <h3 style="color: var(--tfr-gold);">[2] 선거 시스템 및 명칭 설정</h3>
         
         <div class="input-row">
             <div class="input-box">
@@ -393,23 +1050,23 @@
             </div>
         </div>
 
-        <!-- 명칭 설정 UI 추가됨 -->
+        <!-- 명칭 설정 UI -->
         <div class="input-row" style="margin-top: 15px;">
             <div class="input-box unicameral-only">
-                <label>국회 명칭 (단원제)</label>
+                <label>국회 명칭 (단원제 전용)</label>
                 <input type="text" id="input-single-name" value="국회" oninput="updateHouseName('single', this.value)">
             </div>
             <div class="input-box bicameral-only" style="display: none;">
-                <label>하원 명칭 (양원제)</label>
+                <label>하원 명칭 (양원제 전용)</label>
                 <input type="text" id="input-lower-name" value="하원" oninput="updateHouseName('lower', this.value)">
             </div>
             <div class="input-box bicameral-only" style="display: none;">
-                <label>상원 명칭 (양원제)</label>
+                <label>상원 명칭 (양원제 전용)</label>
                 <input type="text" id="input-upper-name" value="상원" oninput="updateHouseName('upper', this.value)">
             </div>
         </div>
 
-        <div class="input-row" style="margin-top: 15px;">
+        <div class="input-row" style="margin-top: 15px; align-items: flex-end;">
             <div class="input-box">
                 <label>전체 의석 수 (단원/하원)</label>
                 <input type="number" id="input-total-seats-target" value="300">
@@ -418,26 +1075,59 @@
                 <label>상원 의석 수 (양원제)</label>
                 <input type="number" id="input-total-seats-upper" value="100">
             </div>
-            <div class="input-box" style="flex-direction: row; align-items: center; gap: 10px; min-width: 180px;">
-                <input type="checkbox" id="input-show-majority-line" checked onchange="renderDashboard()">
-                <label style="margin:0; color: #fff; cursor: pointer;" for="input-show-majority-line">과반수 기준선 표시</label>
+            
+            <!-- 선 관련 토글 스위치 2종 -->
+            <div class="input-box" style="flex-direction: column; align-items: flex-start; gap: 10px; min-width: 250px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="input-show-majority-line" checked onchange="renderDashboard()">
+                    <label style="margin:0; color: #fff; cursor: pointer;" for="input-show-majority-line">차트: 과반수 기준선 표시</label>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="input-show-ruling-highlight" checked onchange="renderDashboard()">
+                    <label style="margin:0; color: #fff; cursor: pointer;" for="input-show-ruling-highlight">차트: 집권 세력(여당) 강조선 표시</label>
+                </div>
             </div>
         </div>
-        <p style="font-size:12px; color:#888;">* 각 정당에 입력된 '오차(%)' 내에서 지지율이 무작위로 요동칩니다.</p>
-        <button class="btn-simulate" onclick="runRandomElectionSimulation()">무작위 선거 결과 산출 실행</button>
+        
+        <p style="font-size:12px; color:#aaa; border-left: 3px solid var(--tfr-gold); padding-left: 10px;">
+            * 무작위 선거 기능은 각 정당의 '지지도'와 '오차(%)'를 기반으로 의석을 재산출합니다.
+        </p>
+        <button class="btn-simulate" onclick="runRandomElectionSimulation()">▶ 무작위 선거 결과 산출 실행</button>
     </div>
 
-    <!-- 정당 및 의석 설정 -->
+    <!-- [3] 연정(정당 동맹) 관리 영역 -->
+    <div class="control-group" style="border-color: var(--tfr-blue);">
+        <h3 style="color: var(--tfr-blue);">[3] 연정 (정당 동맹/연합) 관리</h3>
+        <p style="font-size:13px; color:#aaa; margin-top:0;">
+            * 여러 정당을 하나의 연합(동맹)으로 묶을 수 있습니다. 여기서 연합을 <b>'집권(여당)'</b>으로 설정하면 소속된 모든 정당이 자동으로 여당 처리됩니다.
+        </p>
+        <button class="btn-add" style="background: #003366; border-color: #0055aa;" onclick="addAlliance()">+ 새 연합(동맹) 추가</button>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 50%;">연합(동맹) 명칭</th>
+                        <th>집권(여당) 설정</th>
+                        <th>삭제</th>
+                    </tr>
+                </thead>
+                <tbody id="alliance-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- [4] 정당 기본 데이터 및 의석 설정 영역 -->
     <div class="control-group">
-        <h3 style="color: var(--tfr-purple);">[3] 정당 상세 데이터 설정</h3>
+        <h3 style="color: var(--tfr-purple);">[4] 정당 의석 및 데이터 설정</h3>
         <button class="btn-add" onclick="addParty()">+ 새 정당 추가</button>
         <div class="table-responsive">
             <table>
                 <thead>
                     <tr>
-                        <th>순서</th>
-                        <th>상세표시</th>
-                        <th>집권(여당)</th>
+                        <th title="리스트 순서를 변경합니다.">순서</th>
+                        <th title="우측 하단 상세 정보 박스에 띄울 정당을 선택합니다.">포커스</th>
+                        <th title="소속된 연합(동맹)을 선택합니다.">소속 연합(동맹)</th>
+                        <th title="이 정당을 여당으로 설정합니다.">개별 집권(여당)</th>
                         <th>정당명</th>
                         <th>색상</th>
                         <th>지지도(%)</th>
@@ -452,17 +1142,20 @@
         </div>
     </div>
 
-    <!-- 정당 부가 정보 설정 (전체 표 형식) -->
-    <div class="control-group" style="border-color: #44aa44;">
-        <h3 style="color: #44aa44;">[4] 정당 부가 정보 설정</h3>
+    <!-- [5] 정당 부가 정보(사진, 로고 등) 설정 영역 -->
+    <div class="control-group" style="border-color: var(--tfr-green);">
+        <h3 style="color: var(--tfr-green);">[5] 정당 미디어 및 상세정보 설정</h3>
+        <p style="font-size:13px; color:#aaa; margin-top:0;">
+            * 파일 선택 칸을 클릭하거나 이미지를 드래그 앤 드롭하여 로고와 상세 사진을 등록하세요.
+        </p>
         <div class="table-responsive">
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 15%;">정당명</th>
-                        <th style="width: 15%;">로고</th>
-                        <th style="width: 15%;">상세사진</th>
-                        <th style="width: 55%;">상세설명</th>
+                        <th style="width: 15%;">정당명 (연동됨)</th>
+                        <th style="width: 15%;">정당 로고 (원형)</th>
+                        <th style="width: 15%;">상세 인포 사진</th>
+                        <th style="width: 55%;">정당 상세 설명</th>
                     </tr>
                 </thead>
                 <tbody id="details-tbody"></tbody>
@@ -470,34 +1163,41 @@
         </div>
     </div>
 
+    <!-- 하단 액션 버튼들 (저장, 불러오기, 캡처) -->
     <div class="data-action-row">
-        <button class="btn-save-json" onclick="saveDataAsJSON()">데이터 저장 (JSON)</button>
-        <label for="load-json-input" class="btn-load-json">데이터 불러오기</label>
+        <button class="btn-save-json" onclick="saveDataAsJSON()">데이터 설정 저장 (JSON)</button>
+        <label for="load-json-input" class="btn-load-json">데이터 불러오기 (JSON)</label>
         <input type="file" id="load-json-input" accept=".json" style="display:none;" onchange="loadDataFromJSON(event)">
     </div>
 
     <div class="save-btn-row">
-        <button class="btn-save" id="btn-save-lower" onclick="saveImage('window-lower', '국회')">국회 화면 이미지 저장</button>
-        <button class="btn-save bicameral-only" id="btn-save-upper" onclick="saveImage('window-upper', '상원')" style="display: none;">상원 화면 이미지 저장</button>
+        <button class="btn-save" id="btn-save-lower" onclick="saveImage('window-lower', '국회')">국회 화면 고화질 캡처 및 저장</button>
+        <button class="btn-save bicameral-only" id="btn-save-upper" onclick="saveImage('window-upper', '상원')" style="display: none;">상원 화면 고화질 캡처 및 저장</button>
     </div>
 </div>
 
-<!-- 우측 캡처 영역 -->
+<!-- 
+  ==========================================
+  우측: 시각화되는 캡처(렌더링) 뷰어 패널
+  ==========================================
+-->
 <div class="capture-wrapper">
     <div id="capture-area">
-        <!-- 1. 정치 창 -->
+        
+        <!-- 시각화 1: 국가 및 정치 리더 창 -->
         <div class="hoi4-window politics-window">
             <div class="hoi4-header">
-                <div class="header-title">정치</div>
+                <div class="header-title">정치 및 국가 상황</div>
                 <div class="header-btn">X</div>
             </div>
             <div class="politics-content">
                 <div class="politics-top">
                     <div class="leader-box">
-                        <img id="ui-leader-img" class="leader-img" src="" alt="Leader">
+                        <img id="ui-leader-img" class="leader-img" src="" alt="Leader Thumbnail">
                         <div class="leader-name" id="ui-leader-name">홍길동</div>
                     </div>
                     <div class="focus-box">
+                        <!-- 국가 중점 바 -->
                         <div class="focus-current">
                             <div class="focus-inner-glow-frame"></div>
                             <div class="focus-text" id="ui-focus-name">중점 이름</div>
@@ -514,6 +1214,7 @@
                     <div class="party-box">
                         <div class="pie-container">
                             <div class="pie-ring"></div>
+                            <!-- CSS Conic Gradient로 그려질 미니 파이 차트 -->
                             <div class="pie-chart" id="ui-pie-chart"></div>
                         </div>
                         <div class="party-list-sm" id="ui-party-list"></div>
@@ -522,7 +1223,7 @@
             </div>
         </div>
 
-        <!-- 2. 국회 창 (단원 / 하원) -->
+        <!-- 시각화 2: 국회/하원 차트 창 -->
         <div id="window-lower" class="hoi4-window parliament-window">
             <div class="hoi4-header">
                 <div class="header-title" id="ui-parliament-header-title">
@@ -532,9 +1233,11 @@
                 <div class="header-btn">ᐱ</div>
             </div>
             <div class="parliament-content">
+                <!-- SVG 반원 국회 차트 영역 -->
                 <div class="chart-container">
                     <svg id="parliament-svg" viewBox="0 0 600 300"></svg>
                 </div>
+                <!-- 하단 의석 상세 및 인포 박스 -->
                 <div class="bottom-section">
                     <div id="coalition-summary-area"></div>
                     <div class="lower-info-row">
@@ -545,7 +1248,7 @@
             </div>
         </div>
 
-        <!-- 3. 국회 창 (상원 - 양원제 전용) -->
+        <!-- 시각화 3: 상원 차트 창 (양원제 활성화 시에만 표시됨) -->
         <div id="window-upper" class="hoi4-window parliament-window bicameral-only" style="display: none; margin-top: 20px;">
             <div class="hoi4-header">
                 <div class="header-title" id="ui-parliament-header-title-upper">
@@ -555,10 +1258,10 @@
                 <div class="header-btn">ᐱ</div>
             </div>
             <div class="parliament-content">
+                <!-- SVG 반원 상원 차트 영역 -->
                 <div class="chart-container">
                     <svg id="parliament-svg-upper" viewBox="0 0 600 300"></svg>
                 </div>
-                <!-- 하단 요약과 정보 박스가 들어가는 하단 구역 -->
                 <div class="bottom-section">
                     <div id="coalition-summary-area-upper"></div>
                     <div class="lower-info-row">
@@ -571,16 +1274,37 @@
     </div>
 </div>
 
+<!-- 
+  ==========================================
+  JavaScript: 로직 및 렌더링 엔진
+  ==========================================
+-->
 <script>
-    // 드래그 앤 드롭 공통 유틸리티 함수 - 항상 최상단에 선언하여 ReferenceError 방지
+    
+    /**
+     * 이미지 드래그 앤 드롭 업로드를 처리하는 공통 유틸리티 함수입니다.
+     * 파일이 드롭되면 FileReader를 통해 DataURL을 읽어 콜백으로 전달합니다.
+     * 
+     * @param {string} elementId - 드래그 이벤트를 바인딩할 요소의 ID
+     * @param {Function} callback - 이미지 DataURL을 인자로 받는 콜백 함수
+     */
     function setupDragAndDrop(elementId, callback) {
         const zone = document.getElementById(elementId);
         if (!zone) return;
-        zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('dragover'); });
-        zone.addEventListener('dragleave', () => { zone.classList.remove('dragover'); });
+        
+        zone.addEventListener('dragover', (e) => { 
+            e.preventDefault(); 
+            zone.classList.add('dragover'); 
+        });
+        
+        zone.addEventListener('dragleave', () => { 
+            zone.classList.remove('dragover'); 
+        });
+        
         zone.addEventListener('drop', (e) => {
             e.preventDefault();
             zone.classList.remove('dragover');
+            
             const file = e.dataTransfer.files[0];
             if (file && file.type.startsWith('image/')) {
                 const reader = new FileReader();
@@ -590,19 +1314,34 @@
         });
     }
 
-    let partyIdCounter = 10;
+    // --- 시스템 상태 변수 선언 ---
+    let partyIdCounter = 100;
     let parties = [];
-    let selectedPartyId = 3; 
+    
+    let allianceIdCounter = 10;
+    let alliances = [];
+
+    let selectedPartyId = null; 
+    
+    // 기본 로고 이미지 URL
     let parliamentIconUrl = "https://cdn-icons-png.flaticon.com/512/5455/5455402.png";
     let upperParliamentIconUrl = "https://cdn-icons-png.flaticon.com/512/5455/5455402.png";
-    let parliamentType = "단원제"; // 단원제 or 양원제
-    let govType = "coalition"; // coalition or single
     
-    // 국회 명칭 관련 변수 추가
+    // 제도 설정
+    let parliamentType = "단원제"; // "단원제" 또는 "양원제"
+    let govType = "coalition"; // "coalition" (연립) 또는 "single" (단독)
+    
+    // 국회 창 명칭 설정
     let singleName = "국회";
     let lowerName = "하원";
     let upperName = "상원";
 
+    /**
+     * 국회, 상하원 명칭을 업데이트하고 UI에 즉시 반영합니다.
+     * 
+     * @param {string} type - 'single', 'lower', 'upper' 중 하나
+     * @param {string} val - 사용자가 입력한 새로운 명칭
+     */
     function updateHouseName(type, val) {
         if (type === 'single') singleName = val || '국회';
         if (type === 'lower') lowerName = val || '하원';
@@ -612,6 +1351,10 @@
         renderDashboard();
     }
 
+    /**
+     * 제어판의 라벨 텍스트와 저장 버튼의 텍스트를 
+     * 현재 활성화된 제도(단/양원)와 명칭에 맞춰 업데이트합니다.
+     */
     function updateLabelsAndButtons() {
         const label = document.getElementById('label-parliament-logo');
         const labelUpper = document.getElementById('label-parliament-logo-upper');
@@ -622,29 +1365,36 @@
             label.innerText = `${lowerName} 로고 (드래그)`;
             if(labelUpper) labelUpper.innerText = `${upperName} 로고 (드래그)`;
             
-            btnSaveLower.innerText = `${lowerName} 화면 이미지 저장`;
+            btnSaveLower.innerText = `${lowerName} 화면 고화질 캡처`;
             btnSaveLower.setAttribute('onclick', `saveImage('window-lower', '${lowerName}')`);
             
             if(btnSaveUpper) {
-                btnSaveUpper.innerText = `${upperName} 화면 이미지 저장`;
+                btnSaveUpper.innerText = `${upperName} 화면 고화질 캡처`;
                 btnSaveUpper.setAttribute('onclick', `saveImage('window-upper', '${upperName}')`);
             }
         } else {
             label.innerText = `${singleName} 로고 (드래그)`;
-            btnSaveLower.innerText = `${singleName} 화면 이미지 저장`;
+            btnSaveLower.innerText = `${singleName} 화면 고화질 캡처`;
             btnSaveLower.setAttribute('onclick', `saveImage('window-lower', '${singleName}')`);
         }
     }
 
-    // 국회 형태(단원/양원) 업데이트
+    /**
+     * 국회 형태(단원제/양원제)를 변경하고 관련 UI를 토글합니다.
+     * 
+     * @param {string} val - '단원제' 또는 '양원제'
+     */
     function updateParliamentType(val) {
         parliamentType = val;
         
-        // 양원제 및 단원제 전용 UI 표시/숨김 처리
+        // CSS 클래스를 이용한 양원제/단원제 전용 엘리먼트 가시성 제어
         const bicameralElements = document.querySelectorAll('.bicameral-only');
         bicameralElements.forEach(el => {
-            el.style.display = (el.tagName === 'TH' || el.tagName === 'TD') ? 'table-cell' : (el.classList.contains('input-box') ? 'flex' : 'block');
-            if (val !== '양원제') el.style.display = 'none';
+            if (val === '양원제') {
+                el.style.display = (el.tagName === 'TH' || el.tagName === 'TD') ? 'table-cell' : (el.classList.contains('input-box') ? 'flex' : 'block');
+            } else {
+                el.style.display = 'none';
+            }
         });
 
         const unicameralElements = document.querySelectorAll('.unicameral-only');
@@ -662,48 +1412,149 @@
         renderDetailsTable();
     }
 
-    // 정부 형태(연립/단독) 업데이트
+    /**
+     * 정부 형태(연립/단독)를 변경합니다.
+     * 단독 집권으로 변경 시, 기존에 여러 개가 여당으로 체크되어 있었다면
+     * 논리적 오류를 막기 위해 첫 번째 여당 세력만 남기고 모두 해제합니다.
+     * 
+     * @param {string} val - 'coalition' 또는 'single'
+     */
     function updateGovType(val) {
         govType = val;
         if (govType === 'single') {
-            // 단독 집권으로 변경 시, 여러 여당이 체크되어 있으면 첫 번째만 남김
-            let foundFirst = false;
+            let foundFirstRuling = false;
+            
+            // 연합(Alliance) 검사
+            alliances.forEach(a => {
+                if (a.isRuling) {
+                    if (!foundFirstRuling) foundFirstRuling = true;
+                    else a.isRuling = false;
+                }
+            });
+            
+            // 개별 정당 검사
             parties.forEach(p => {
-                if (p.isCoalition) {
-                    if (!foundFirst) { foundFirst = true; }
-                    else { p.isCoalition = false; }
+                if (p.isCoalition && !p.allianceId) {
+                    if (!foundFirstRuling) foundFirstRuling = true;
+                    else p.isCoalition = false;
                 }
             });
         }
+        renderAllianceTable();
         renderControls();
         renderDashboard();
     }
 
-    // 집권당(여당) 체크박스/라디오버튼 변경 처리
+    // --- 연합(Alliance) 관리 함수 ---
+    
+    function addAlliance() {
+        alliances.push({ id: allianceIdCounter++, name: "새 동맹", isRuling: false });
+        renderAllianceTable(); 
+        renderControls(); 
+        renderDashboard();
+    }
+
+    function removeAlliance(id) {
+        alliances = alliances.filter(a => a.id !== id);
+        // 삭제된 연합에 소속되어 있던 정당들의 연합 ID 초기화
+        parties.forEach(p => { if(p.allianceId === id) p.allianceId = null; });
+        
+        renderAllianceTable(); 
+        renderControls(); 
+        renderDashboard();
+    }
+
+    function updateAlliance(id, field, value) {
+        const al = alliances.find(a => a.id === id);
+        if (al) {
+            al[field] = value;
+            
+            // 단독 집권 체제에서 특정 연합이 여당이 되면, 다른 모든 여당 설정은 해제됨
+            if (field === 'isRuling' && govType === 'single' && value === true) {
+                alliances.forEach(otherAl => { if(otherAl.id !== id) otherAl.isRuling = false; });
+                parties.forEach(p => p.isCoalition = false);
+            }
+            
+            renderAllianceTable(); 
+            renderControls(); 
+            renderDashboard();
+        }
+    }
+
+    function renderAllianceTable() {
+        const tbody = document.getElementById('alliance-tbody');
+        tbody.innerHTML = '';
+        
+        alliances.forEach(a => {
+            // 정부 형태에 따라 체크박스(연립) 또는 라디오버튼(단독)으로 렌더링
+            let rulingInputHtml = govType === 'coalition' 
+                ? `<input type="checkbox" onchange="updateAlliance(${a.id}, 'isRuling', this.checked)" ${a.isRuling ? 'checked' : ''}>`
+                : `<input type="radio" name="ruling-radio" onchange="updateAlliance(${a.id}, 'isRuling', true)" ${a.isRuling ? 'checked' : ''}>`;
+                
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><input type="text" value="${a.name}" oninput="updateAlliance(${a.id}, 'name', this.value)"></td>
+                <td>${rulingInputHtml}</td>
+                <td><button class="btn-del" onclick="removeAlliance(${a.id})">X</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    /**
+     * 특정 정당이 현재 '여당(집권세력)'인지 판단합니다.
+     * 연합에 속해있다면 연합의 상태를 따르고, 없다면 개별 isCoalition 값을 따릅니다.
+     * 
+     * @param {Object} p - 정당 객체
+     * @returns {boolean} - 여당 여부
+     */
+    function isPartyRuling(p) {
+        if (p.allianceId) {
+            const al = alliances.find(a => a.id === p.allianceId);
+            return al ? al.isRuling : false;
+        }
+        return p.isCoalition;
+    }
+
+    /**
+     * 개별 정당의 여당 설정 체크박스/라디오 버튼을 제어합니다.
+     * 
+     * @param {number} id - 정당 고유 ID
+     * @param {boolean} isChecked - 체크 여부
+     */
     function handleRulingChange(id, isChecked) {
         if (govType === 'single') {
-            // 단독 집권: 라디오버튼처럼 작동
+            // 단독 집권 모드: 기존 모든 여당 설정을 끄고 현재 정당만 true
             parties.forEach(p => p.isCoalition = false);
+            alliances.forEach(a => a.isRuling = false);
             const party = parties.find(p => p.id === id);
             if (party) party.isCoalition = true;
         } else {
-            // 연립 정부: 체크박스처럼 작동 (다중 선택 가능)
+            // 연립 모드: 다중 선택 허용
             const party = parties.find(p => p.id === id);
             if (party) party.isCoalition = isChecked;
         }
-        renderControls();
+        renderAllianceTable(); 
+        renderControls(); 
         renderDashboard();
     }
 
-    // 정당별 오차범위를 적용한 무작위 선거 시뮬레이션
+    /**
+     * 정당의 지지도와 오차 범위를 바탕으로 무작위 선거를 돌려 
+     * 새로운 의석수를 할당하는 핵심 시뮬레이션 알고리즘입니다.
+     * (헤어 쿼터 방식의 최대 잔여 수법을 응용하여 정확한 의석을 배분합니다.)
+     */
     function runRandomElectionSimulation() {
         const totalSeatsTarget = parseInt(document.getElementById('input-total-seats-target').value) || 300;
         const totalSeatsUpperTarget = parseInt(document.getElementById('input-total-seats-upper').value) || 100;
         
+        // 1. 오차범위를 적용한 임시 지지도 산출
         let adjustedParties = parties.map(p => {
             let margin = parseFloat(p.errorMargin) || 0;
+            // -margin ~ +margin 사이의 난수 생성
             let swing = (Math.random() * margin * 2) - margin;
             let baseSupport = parseFloat(p.support) || 0;
+            // 지지도가 음수가 되지 않도록 최소 0.1 보장
             let adjustedSupport = Math.max(0.1, baseSupport + swing); 
             return { ...p, tempSupport: adjustedSupport };
         });
@@ -711,48 +1562,49 @@
         let totalAdjustedSupport = adjustedParties.reduce((sum, p) => sum + p.tempSupport, 0);
         if (totalAdjustedSupport === 0) return;
 
-        // 하원(단원) 의석 계산
-        let seatsAssigned = 0;
-        let calculations = adjustedParties.map(p => {
-            let exact = (p.tempSupport / totalAdjustedSupport) * totalSeatsTarget;
-            let floor = Math.floor(exact);
-            seatsAssigned += floor;
-            return { id: p.id, exact, floor, remainder: exact - floor };
-        });
-
-        let remaining = totalSeatsTarget - seatsAssigned;
-        calculations.sort((a, b) => b.remainder - a.remainder);
-        for (let i = 0; i < remaining; i++) { calculations[i].floor += 1; }
-
-        calculations.forEach(calc => {
-            const p = parties.find(party => party.id === calc.id);
-            if (p) p.seats = calc.floor;
-        });
-
-        // 상원 의석 계산 (양원제일 경우)
-        if (parliamentType === '양원제') {
-            let upperSeatsAssigned = 0;
-            let upperCalculations = adjustedParties.map(p => {
-                let exact = (p.tempSupport / totalAdjustedSupport) * totalSeatsUpperTarget;
+        // 의석 할당 내부 헬퍼 함수 (최대 잔여 수법)
+        function assignSeats(seatField, targetTotal) {
+            let seatsAssigned = 0;
+            
+            // 1차 할당: 정확한 비율에 따른 정수(내림) 의석 할당 및 소수점(잔여) 계산
+            let calculations = adjustedParties.map(p => {
+                let exact = (p.tempSupport / totalAdjustedSupport) * targetTotal;
                 let floor = Math.floor(exact);
-                upperSeatsAssigned += floor;
+                seatsAssigned += floor;
                 return { id: p.id, exact, floor, remainder: exact - floor };
             });
 
-            let upperRemaining = totalSeatsUpperTarget - upperSeatsAssigned;
-            upperCalculations.sort((a, b) => b.remainder - a.remainder);
-            for (let i = 0; i < upperRemaining; i++) { upperCalculations[i].floor += 1; }
+            let remainingSeats = targetTotal - seatsAssigned;
+            
+            // 2차 할당: 소수점(잔여)이 큰 순서대로 남은 의석을 1석씩 분배
+            calculations.sort((a, b) => b.remainder - a.remainder);
+            for (let i = 0; i < remainingSeats; i++) { 
+                calculations[i].floor += 1; 
+            }
 
-            upperCalculations.forEach(calc => {
+            // 원본 정당 데이터에 최종 의석 업데이트
+            calculations.forEach(calc => {
                 const p = parties.find(party => party.id === calc.id);
-                if (p) p.seatsUpper = calc.floor;
+                if (p) p[seatField] = calc.floor;
             });
         }
 
+        // 하원(단원) 시뮬레이션 실행
+        assignSeats('seats', totalSeatsTarget);
+        
+        // 양원제 활성화 시 상원도 시뮬레이션 실행
+        if (parliamentType === '양원제') {
+            assignSeats('seatsUpper', totalSeatsUpperTarget);
+        }
+
+        // 결과 UI에 반영
         renderControls();
         renderDashboard();
     }
 
+    /**
+     * 리스트에서 정당의 순서를 위/아래로 이동시킵니다.
+     */
     function moveParty(id, direction) {
         const index = parties.findIndex(p => p.id === id);
         if (index < 0) return;
@@ -770,6 +1622,9 @@
         renderDetailsTable();
     }
 
+    /**
+     * 메인 제어판의 단일 이미지 업로드(지도자, 로고 등)를 처리합니다.
+     */
     function handleFileUploadGlobal(event, targetId, previewId) {
         const file = event.target.files[0];
         if (file) {
@@ -784,80 +1639,137 @@
                     document.getElementById('ui-parliament-icon-small-upper').src = imgData;
                 } else {
                     const uiImg = document.getElementById(targetId);
-                    if(uiImg) { uiImg.src = imgData; uiImg.style.display = "block"; uiImg.style.backgroundColor = "transparent"; }
+                    if(uiImg) { 
+                        uiImg.src = imgData; 
+                        uiImg.style.display = "block"; 
+                        uiImg.style.backgroundColor = "transparent"; 
+                    }
                 }
+                
                 const previewImg = document.getElementById(previewId);
-                if(previewImg) { previewImg.src = imgData; previewImg.style.display = "block"; previewImg.style.backgroundColor = "transparent"; }
+                if(previewImg) { 
+                    previewImg.src = imgData; 
+                    previewImg.style.display = "block"; 
+                    previewImg.style.backgroundColor = "transparent"; 
+                }
+                
                 renderDashboard();
             };
             reader.readAsDataURL(file);
         }
     }
 
-    // 표 4의 행마다 첨부파일 업로드할 때 호출되는 함수
+    /**
+     * 정당 상세 정보 표 내부의 이미지 업로드를 처리합니다.
+     */
     function handleRowFileUpload(event, id, field) {
         const file = event.target.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = (e) => { 
                 updateParty(id, field, e.target.result); 
-                renderDetailsTable(); // 표 4 재렌더링
+                renderDetailsTable(); // 뷰 갱신
             };
             reader.readAsDataURL(file);
         }
     }
 
+    // CRUD: 정당 추가
     function addParty() {
-        parties.push({ id: partyIdCounter++, name: "새 정당", color: "#666666", seats: 0, seatsUpper: 0, support: 0, errorMargin: 5.0, isCoalition: false, logoUrl: '', infoImageUrl: '', description: "" });
+        parties.push({ 
+            id: partyIdCounter++, 
+            name: "신규 정당", 
+            color: "#888888", 
+            seats: 0, 
+            seatsUpper: 0, 
+            support: 0, 
+            errorMargin: 3.0, 
+            isCoalition: false, 
+            allianceId: null, // 기본적으로 연합 없음
+            logoUrl: '', 
+            infoImageUrl: '', 
+            description: "새로 추가된 정당입니다. 내용을 수정하세요." 
+        });
         renderControls(); 
         renderDashboard();
         renderDetailsTable();
     }
 
+    // CRUD: 정당 삭제
     function removeParty(id) {
         parties = parties.filter(p => p.id !== id);
-        if (selectedPartyId === id && parties.length > 0) selectedPartyId = parties[0].id;
-        else if (parties.length === 0) selectedPartyId = null;
+        
+        // 만약 포커스 중이던 정당이 삭제되었다면 첫번째 정당으로 포커스 이동
+        if (selectedPartyId === id && parties.length > 0) {
+            selectedPartyId = parties[0].id;
+        } else if (parties.length === 0) {
+            selectedPartyId = null;
+        }
+        
         renderControls(); 
         renderDashboard(); 
         renderDetailsTable();
     }
 
+    // 우측 하단 인포 박스에 띄울 정당 지정
     function selectPartyInfo(id) { 
         selectedPartyId = id; 
-        renderControls(); 
+        renderControls(); // 체크박스 UI 동기화
         renderDashboard(); 
     }
 
+    // 개별 정당 데이터 속성 변경
     function updateParty(id, field, value) {
         const party = parties.find(p => p.id === id);
         if (party) {
-            party[field] = (field === 'seats' || field === 'seatsUpper' || field === 'support' || field === 'errorMargin') ? (parseFloat(value) || 0) : value;
+            // 숫자형 데이터 파싱 안전장치
+            if (['seats', 'seatsUpper', 'support', 'errorMargin'].includes(field)) {
+                party[field] = parseFloat(value) || 0;
+            } else {
+                party[field] = value;
+            }
             
-            // 이름이 변경된 경우 4번 표의 이름 텍스트만 교체하여 깜빡임 방지
+            // 이름이 변경된 경우 표4의 텍스트 렌더링 갱신 (전체 렌더링 방지로 깜빡임 최소화)
             if (field === 'name') {
                 const detailNameTd = document.getElementById(`detail-name-${id}`);
                 if (detailNameTd) detailNameTd.innerText = value;
+            }
+            
+            // 연합이 변경된 경우, 연합 상태에 귀속되므로 UI 전체 갱신 필요
+            if (field === 'allianceId') {
+                renderControls();
             }
             
             renderDashboard();
         }
     }
 
-    // 초기 이벤트 리스너 바인딩 및 데이터 설정
     window.addEventListener('DOMContentLoaded', () => {
+        // 배경 기본설정
         document.getElementById('ui-leader-img').style.backgroundColor = "#222";
         
-        parties = [
-            { id: 1, name: "정당 1", color: "#e3a857", seats: 100, seatsUpper: 33, support: 45.2, errorMargin: 3.5, isCoalition: true, logoUrl: '', infoImageUrl: '', description: "정당에 대한 설명입니다." },
-            { id: 2, name: "정당 2", color: "#cc1122", seats: 100, seatsUpper: 33, support: 38.5, errorMargin: 4.2, isCoalition: true, logoUrl: '', infoImageUrl: '', description: "정당에 대한 설명입니다." },
-            { id: 3, name: "정당 3", color: "#aa2244", seats: 100, seatsUpper: 34, support: 11.3, errorMargin: 2.1, isCoalition: false, logoUrl: '', infoImageUrl: '', description: "정당들은 노동 운동 기반의 정당들입니다." }
+        // 테스트용 기본 연합 데이터
+        alliances = [
+            { id: 1, name: "희망과 진보 연합", isRuling: true },
+            { id: 2, name: "자유와 질서 동맹", isRuling: false }
         ];
 
-        // 초기 드래그 앤 드롭 영역 바인딩
+        // 테스트용 가상 정당 데이터 구성
+        parties = [
+            { id: 1, name: "미래평화당", color: "#0055aa", seats: 168, seatsUpper: 50, support: 45.2, errorMargin: 3.5, isCoalition: false, allianceId: 1, logoUrl: '', infoImageUrl: '', description: "진보와 복지를 최우선 가치로 삼는 가상의 제1정당입니다." },
+            { id: 2, name: "신보수당", color: "#cc2222", seats: 111, seatsUpper: 40, support: 38.5, errorMargin: 4.2, isCoalition: false, allianceId: 2, logoUrl: '', infoImageUrl: '', description: "시장 경제와 국가 안보를 중시하는 가상의 보수 정당입니다." },
+            { id: 3, name: "녹색시민당", color: "#22aa44", seats: 6, seatsUpper: 2, support: 5.3, errorMargin: 1.1, isCoalition: false, allianceId: 1, logoUrl: '', infoImageUrl: '', description: "환경 보호와 시민 참여를 주장하는 소수 정당입니다." },
+            { id: 4, name: "무소속", color: "#808080", seats: 15, seatsUpper: 8, support: 11.0, errorMargin: 5.0, isCoalition: false, allianceId: null, logoUrl: '', infoImageUrl: '', description: "특정 당적을 보유하지 않은 독립 의원들입니다." }
+        ];
+
+        selectedPartyId = 1;
+
+        // 메인 설정창 드래그 앤 드롭 구역 초기화
         setupDragAndDrop('drop-leader', (data) => {
             const uiImg = document.getElementById('ui-leader-img');
-            uiImg.src = data; uiImg.style.display = "block"; uiImg.style.backgroundColor = "transparent";
+            uiImg.src = data; 
+            uiImg.style.display = "block"; 
+            uiImg.style.backgroundColor = "transparent";
             document.getElementById('preview-ui-leader-img').src = data;
         });
 
@@ -875,8 +1787,9 @@
             renderDashboard(); 
         });
 
-        // 초기 화면 그리기
+        // 초기 시스템 렌더링 사이클 실행
         updateLabelsAndButtons();
+        renderAllianceTable();
         renderControls();
         renderDashboard();
         renderDetailsTable();
@@ -890,40 +1803,59 @@
 
         parties.forEach((p, index) => {
             
-            // 정부 형태에 따른 라디오 / 체크박스 분기 처리
-            let rulingInputHtml = govType === 'coalition' 
-                ? `<input type="checkbox" onchange="handleRulingChange(${p.id}, this.checked)" ${p.isCoalition ? 'checked' : ''}>`
-                : `<input type="radio" name="ruling-radio" onchange="handleRulingChange(${p.id}, true)" ${p.isCoalition ? 'checked' : ''}>`;
+            let isRuling = isPartyRuling(p);
+            let rulingInputHtml = '';
+            
+            // 연합(Alliance)에 소속된 정당은 개별 여당 설정을 막고, 연합의 설정을 따르게 함
+            if (p.allianceId) {
+                rulingInputHtml = `<input type="checkbox" disabled ${isRuling ? 'checked' : ''} title="소속 연합의 집권 설정을 따릅니다.">`;
+            } else {
+                // 정부 형태에 따른 분기 (다중선택 가능 여부)
+                if (govType === 'coalition') {
+                    rulingInputHtml = `<input type="checkbox" onchange="handleRulingChange(${p.id}, this.checked)" ${p.isCoalition ? 'checked' : ''} title="여당으로 설정">`;
+                } else {
+                    rulingInputHtml = `<input type="radio" name="ruling-radio" onchange="handleRulingChange(${p.id}, true)" ${p.isCoalition ? 'checked' : ''} title="단독 여당으로 설정">`;
+                }
+            }
 
+            // 정당 연합 선택을 위한 셀렉트 박스 생성
+            let allianceSelect = `<select style="width:100%; padding: 6px; font-size:12px;" onchange="updateParty(${p.id}, 'allianceId', this.value ? parseInt(this.value) : null)">
+                <option value="">(무소속/독자)</option>
+                ${alliances.map(a => `<option value="${a.id}" ${p.allianceId === a.id ? 'selected' : ''}>[동맹] ${a.name}</option>`).join('')}
+            </select>`;
+
+            // 테이블 행 생성 및 주입
             let tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>
                     <button class="btn-move" onclick="moveParty(${p.id}, 'up')" ${index === 0 ? 'disabled' : ''}>▲</button>
                     <button class="btn-move" onclick="moveParty(${p.id}, 'down')" ${index === parties.length - 1 ? 'disabled' : ''}>▼</button>
                 </td>
-                <td><input type="checkbox" class="square-check" title="시각화 영역에 상세 정보 표시" onchange="selectPartyInfo(${p.id})" ${selectedPartyId === p.id ? 'checked' : ''}></td>
+                <td><input type="checkbox" class="square-check" title="시각화 영역 우측 하단에 상세 정보를 표시합니다" onchange="selectPartyInfo(${p.id})" ${selectedPartyId === p.id ? 'checked' : ''}></td>
+                <td>${allianceSelect}</td>
                 <td>${rulingInputHtml}</td>
                 <td><input type="text" value="${p.name}" oninput="updateParty(${p.id}, 'name', this.value);"></td>
                 <td><input type="color" value="${p.color}" onchange="updateParty(${p.id}, 'color', this.value)"></td>
-                <td><input type="number" value="${p.support}" step="0.1" oninput="updateParty(${p.id}, 'support', this.value)"></td>
-                <td><input type="number" value="${p.errorMargin}" step="0.1" oninput="updateParty(${p.id}, 'errorMargin', this.value)"></td>
-                <td><input type="number" value="${p.seats}" oninput="updateParty(${p.id}, 'seats', this.value)"></td>
-                <td class="bicameral-only" style="${upperStyle}"><input type="number" value="${p.seatsUpper || 0}" oninput="updateParty(${p.id}, 'seatsUpper', this.value)"></td>
-                <td><button class="btn-del" onclick="removeParty(${p.id})">X</button></td>
+                <td><input type="number" value="${p.support}" step="0.1" min="0" max="100" oninput="updateParty(${p.id}, 'support', this.value)"></td>
+                <td><input type="number" value="${p.errorMargin}" step="0.1" min="0" oninput="updateParty(${p.id}, 'errorMargin', this.value)"></td>
+                <td><input type="number" value="${p.seats}" min="0" oninput="updateParty(${p.id}, 'seats', this.value)"></td>
+                <td class="bicameral-only" style="${upperStyle}"><input type="number" value="${p.seatsUpper || 0}" min="0" oninput="updateParty(${p.id}, 'seatsUpper', this.value)"></td>
+                <td><button class="btn-del" onclick="removeParty(${p.id})" title="정당 삭제">X</button></td>
             `;
             tbody.appendChild(tr);
         });
     }
 
-    // 4번 창 정당 부가 정보 표 렌더링
     function renderDetailsTable() {
         const tbody = document.getElementById('details-tbody');
         tbody.innerHTML = '';
         
         parties.forEach((p) => {
             let tr = document.createElement('tr');
+            
+            // 미디어 업로드를 위한 커스텀 라벨(스퀘어 폼) 생성
             tr.innerHTML = `
-                <td id="detail-name-${p.id}">${p.name}</td>
+                <td id="detail-name-${p.id}" style="font-weight: bold; color: ${p.color}; text-shadow: 1px 1px 0 #000;">${p.name}</td>
                 <td>
                     <label class="square-file-upload" id="drop-detail-logo-${p.id}">
                         <input type="file" accept="image/*" onchange="handleRowFileUpload(event, ${p.id}, 'logoUrl')">
@@ -939,12 +1871,12 @@
                     </label>
                 </td>
                 <td>
-                    <textarea oninput="updateParty(${p.id}, 'description', this.value)">${p.description || ''}</textarea>
+                    <textarea oninput="updateParty(${p.id}, 'description', this.value)" placeholder="정당에 대한 설명을 입력하세요...">${p.description || ''}</textarea>
                 </td>
             `;
             tbody.appendChild(tr);
 
-            // 각 요소에 드래그 앤 드롭 이벤트를 바인딩하기 위해 약간의 지연 처리
+            // 동적으로 생성된 요소에 드래그 앤 드롭 이벤트를 바인딩하기 위해 Event Loop 지연 사용
             setTimeout(() => {
                 setupDragAndDrop(`drop-detail-logo-${p.id}`, (data) => { 
                     updateParty(p.id, 'logoUrl', data); 
@@ -958,100 +1890,191 @@
         });
     }
 
+    /**
+     * 중심점 좌표, 반지름, 각도(라디안)를 받아 2D 직교 좌표계(x, y)로 변환합니다.
+     * SVG 패스를 그리기 위해 필수적인 수학 함수입니다.
+     */
     function polarToCartesian(centerX, centerY, radius, angleInRadians) {
-        return { x: centerX + (radius * Math.cos(angleInRadians)), y: centerY - (radius * Math.sin(angleInRadians)) };
+        return { 
+            x: centerX + (radius * Math.cos(angleInRadians)), 
+            y: centerY - (radius * Math.sin(angleInRadians)) 
+        };
     }
 
+    /**
+     * 시작 각도와 종료 각도를 받아 도넛(Arc) 형태의 SVG 경로(d 속성 값)를 생성합니다.
+     */
     function describeArc(x, y, innerRadius, outerRadius, startAngle, endAngle) {
-        var startOut = polarToCartesian(x, y, outerRadius, startAngle);
-        var endOut = polarToCartesian(x, y, outerRadius, endAngle);
-        var endIn = polarToCartesian(x, y, innerRadius, endAngle);
-        var startIn = polarToCartesian(x, y, innerRadius, startAngle);
-        return [ "M", startOut.x, startOut.y, "A", outerRadius, outerRadius, 0, 0, 1, endOut.x, endOut.y, "L", endIn.x, endIn.y, "A", innerRadius, innerRadius, 0, 0, 0, startIn.x, startIn.y, "Z" ].join(" ");
+        const startOut = polarToCartesian(x, y, outerRadius, startAngle);
+        const endOut = polarToCartesian(x, y, outerRadius, endAngle);
+        const endIn = polarToCartesian(x, y, innerRadius, endAngle);
+        const startIn = polarToCartesian(x, y, innerRadius, startAngle);
+        
+        // M: MoveTo, A: ArcTo, L: LineTo, Z: ClosePath
+        return [ 
+            "M", startOut.x, startOut.y, 
+            "A", outerRadius, outerRadius, 0, 0, 1, endOut.x, endOut.y, 
+            "L", endIn.x, endIn.y, 
+            "A", innerRadius, innerRadius, 0, 0, 0, startIn.x, startIn.y, 
+            "Z" 
+        ].join(" ");
     }
 
+    /**
+     * 설정된 모든 데이터를 바탕으로 우측 캡처 윈도우 UI 전체를 렌더링합니다.
+     */
     function renderDashboard() {
-        let totalSeats = parties.reduce((sum, p) => sum + p.seats, 0);
+        // 정렬: 동맹을 맺은 정당들을 시각적으로 모아서 그리기 위해 정렬 수행
+        let displayParties = [...parties].sort((a, b) => {
+            let aAll = a.allianceId || 9999; // 소속이 없으면 뒤로
+            let bAll = b.allianceId || 9999;
+            if (aAll !== bAll) return aAll - bAll;
+            // 같은 연합 안에서는 의석수 순(내림차순) 정렬
+            return b.seats - a.seats; 
+        });
+
+        let totalSeats = parties.reduce((sum, p) => sum + (p.seats || 0), 0);
         let totalSeatsUpper = parties.reduce((sum, p) => sum + (p.seatsUpper || 0), 0);
 
-        // 상단 파이 차트 (하원 기준)
+        // 1. 정치 창 상단 미니 파이 차트 (하원 의석 기준) 렌더링
         const pie = document.getElementById('ui-pie-chart');
         const smList = document.getElementById('ui-party-list');
         smList.innerHTML = '';
+        
         let currentPieAngle = 0;
         let gradientParts = [];
-        parties.forEach(p => {
-            if(p.seats <= 0) return;
+        
+        displayParties.forEach(p => {
+            if (p.seats <= 0) return; // 의석이 없는 정당은 스킵
+            
+            // 비율 계산 및 CSS 그라디언트 문자열 구성
             let percentage = (p.seats / totalSeats) * 100;
             gradientParts.push(`${p.color} ${currentPieAngle}% ${currentPieAngle + percentage}%`);
             currentPieAngle += percentage;
-            smList.innerHTML += `<div class="party-row-sm"><div class="party-color-box" style="background-color: ${p.color};"></div>${p.name} (${p.seats})</div>`;
+            
+            // 연합 명칭 표기 문자열
+            let alName = '';
+            if (p.allianceId) { 
+                const al = alliances.find(a => a.id === p.allianceId); 
+                if (al) alName = ` <span style="font-size:10px; color:#00aaff; letter-spacing:-0.5px;">[${al.name}]</span>`; 
+            }
+            
+            smList.innerHTML += `
+                <div class="party-row-sm">
+                    <div class="party-color-box" style="background-color: ${p.color};"></div>
+                    ${p.name}${alName} <span style="margin-left:auto;">(${p.seats})</span>
+                </div>
+            `;
         });
+        
+        // CSS Conic Gradient 적용
         pie.style.background = gradientParts.length ? `conic-gradient(${gradientParts.join(', ')})` : '#333';
 
+        // 2. 환경 설정 플래그 확인
         const showMajorityLine = document.getElementById('input-show-majority-line').checked;
+        const showRulingHighlight = document.getElementById('input-show-ruling-highlight').checked;
 
-        // 국회 차트 그리기 헬퍼 함수
+        /**
+         * 국회나 상원의 반원형 SVG 차트를 그립니다.
+         */
         function drawParliamentChart(svgId, seatField, totalTargetSeats, iconUrl) {
             const svg = document.getElementById(svgId);
             if (!svg) return;
-            svg.innerHTML = `<defs><radialGradient id="emblem-bg" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#3d1b1b" /><stop offset="100%" stop-color="#120606" /></radialGradient><filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.8"/></filter></defs>`;
+            
+            // 초기화 및 공통 필터(그림자 등) 정의
+            svg.innerHTML = `
+                <defs>
+                    <radialGradient id="emblem-bg" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#3d1b1b" />
+                        <stop offset="100%" stop-color="#120606" />
+                    </radialGradient>
+                    <filter id="shadow">
+                        <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000" flood-opacity="0.9"/>
+                    </filter>
+                </defs>
+            `;
+            
+            // 배경 기본 반원 프레임 렌더링
             const bgPathD = describeArc(300, 290, 80, 280, Math.PI, 0);
-            svg.innerHTML += `<path d="${bgPathD}" fill="#1c1c1c" stroke="#000" stroke-width="2" />`;
+            svg.innerHTML += `<path d="${bgPathD}" fill="#1c1c1c" stroke="#000000" stroke-width="3" filter="url(#shadow)" />`;
 
+            // 정당별 의석 조각(Slice) 렌더링
             if (totalTargetSeats > 0) {
-                let currentAngle = Math.PI;
-                parties.forEach(p => {
+                let currentAngle = Math.PI; // 좌측 하단(180도)에서 시작
+                
+                displayParties.forEach(p => {
                     let s = p[seatField] || 0;
                     if (s <= 0) return;
+                    
                     let sliceAngle = (s / totalTargetSeats) * Math.PI;
                     let endAngle = currentAngle - sliceAngle;
+                    
+                    // Arc 경로 생성
                     let pathD = describeArc(300, 290, 80, 280, currentAngle, endAngle);
-                    svg.innerHTML += `<path d="${pathD}" fill="${p.color}" stroke="${p.isCoalition ? '#ffd700' : '#111'}" stroke-width="${p.isCoalition ? '4' : '2'}" />`;
-                    let clipId = `clip-${p.id}-${svgId}`;
-                    svg.innerHTML += `<clipPath id="${clipId}"><path d="${pathD}" /></clipPath>`;
-                    let midAngle = currentAngle - (sliceAngle / 2), midRadius = 180;
-                    let logoX = 300 + (midRadius * Math.cos(midAngle)), logoY = 290 - (midRadius * Math.sin(midAngle));
-                    if(p.logoUrl) svg.innerHTML += `<image href="${p.logoUrl}" x="${logoX - 80}" y="${logoY - 80}" width="160" height="160" clip-path="url(#${clipId})" opacity="0.15" preserveAspectRatio="xMidYMid slice" />`;
-                    currentAngle = endAngle;
+                    let isRuling = isPartyRuling(p);
+                    
+                    // 집권 세력 강조선 표시 여부에 따른 스타일 분기
+                    let strokeColor = '#111111';
+                    let strokeWidth = '2';
+                    if (showRulingHighlight && isRuling) {
+                        strokeColor = '#ffd700';
+                        strokeWidth = '4';
+                    }
+                    
+                    // 조각 그리기
+                    svg.innerHTML += `<path d="${pathD}" fill="${p.color}" stroke="${strokeColor}" stroke-width="${strokeWidth}" style="transition: all 0.3s;" />`;
+                    
+                    // 정당 로고가 있다면 조각 위에 클리핑(Clipping)하여 오버레이 렌더링
+                    if (p.logoUrl) {
+                        let clipId = `clip-${p.id}-${svgId}`;
+                        svg.innerHTML += `<clipPath id="${clipId}"><path d="${pathD}" /></clipPath>`;
+                        
+                        let midAngle = currentAngle - (sliceAngle / 2);
+                        let midRadius = 180;
+                        let logoX = 300 + (midRadius * Math.cos(midAngle));
+                        let logoY = 290 - (midRadius * Math.sin(midAngle));
+                        
+                        svg.innerHTML += `<image href="${p.logoUrl}" x="${logoX - 80}" y="${logoY - 80}" width="160" height="160" clip-path="url(#${clipId})" opacity="0.18" preserveAspectRatio="xMidYMid slice" />`;
+                    }
+                    
+                    currentAngle = endAngle; // 다음 정당을 위해 각도 업데이트
                 });
             }
 
+            // 과반수 기준선 렌더링 토글
             if (showMajorityLine) {
                 svg.innerHTML += `
-                    <line x1="300" y1="10" x2="300" y2="210" stroke="#ffffff" stroke-width="1.5" stroke-dasharray="4" opacity="0.7" />
-                    <polygon points="300,22 293,8 307,8" fill="#ffffff" stroke="#000000" stroke-width="0.5" />
+                    <line x1="300" y1="10" x2="300" y2="210" stroke="#ffffff" stroke-width="1.5" stroke-dasharray="5,5" opacity="0.8" />
+                    <polygon points="300,24 292,8 308,8" fill="#ffffff" stroke="#000000" stroke-width="1" />
                 `;
             }
 
+            // 중앙 하단 엠블럼(국회 로고) 렌더링
             if (iconUrl) {
                 svg.innerHTML += `
-                    <circle cx="300" cy="290" r="48" fill="url(#emblem-bg)" stroke="#050505" stroke-width="3" filter="url(#shadow)" />
-                    <image href="${iconUrl}" crossorigin="anonymous" x="262" y="252" width="76" height="76" preserveAspectRatio="xMidYMid meet" style="filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.7)) brightness(0.8) sepia(0.3);" />
+                    <circle cx="300" cy="290" r="50" fill="url(#emblem-bg)" stroke="#050505" stroke-width="4" filter="url(#shadow)" />
+                    <image href="${iconUrl}" crossorigin="anonymous" x="260" y="250" width="80" height="80" preserveAspectRatio="xMidYMid meet" style="filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.9)) brightness(0.9) sepia(0.2);" />
                 `;
             } else {
-                svg.innerHTML += `
-                    <circle cx="300" cy="290" r="30" fill="#111" stroke="#333" stroke-width="2" filter="url(#shadow)" />
-                `;
+                svg.innerHTML += `<circle cx="300" cy="290" r="35" fill="#111" stroke="#333" stroke-width="3" filter="url(#shadow)" />`;
             }
         }
 
         // 하원(또는 단원) 렌더링
         drawParliamentChart('parliament-svg', 'seats', totalSeats, parliamentIconUrl);
         
-        // 상원 렌더링 (양원제인 경우)
+        // 상원 렌더링 (양원제인 경우에만)
         if (parliamentType === '양원제') {
             drawParliamentChart('parliament-svg-upper', 'seatsUpper', totalSeatsUpper, upperParliamentIconUrl);
         }
 
-        // 국회 창 헤더(단원/양원제) 업데이트
+        // 국회 창 상단 헤더 텍스트 적용
         const parliamentHeaderTitle = document.getElementById('ui-parliament-header-title');
         parliamentHeaderTitle.innerHTML = `
             <img id="ui-parliament-icon-small" class="header-icon" src="${parliamentIconUrl}" crossorigin="anonymous" alt="icon">
             ${parliamentType === '양원제' ? lowerName : singleName}
         `;
 
-        // 상원 창 헤더 업데이트
         const parliamentHeaderTitleUpper = document.getElementById('ui-parliament-header-title-upper');
         if (parliamentHeaderTitleUpper) {
             parliamentHeaderTitleUpper.innerHTML = `
@@ -1060,62 +2083,94 @@
             `;
         }
 
-        // 하단 요약 (하원)
-        const rulingParties = parties.filter(p => p.isCoalition);
-        const rulingSeats = rulingParties.reduce((sum, p) => sum + p.seats, 0);
-        const rulingPct = totalSeats > 0 ? ((rulingSeats / totalSeats) * 100).toFixed(1) : 0;
-        
-        let summaryHtml = '';
-        if (govType === 'single') {
-            const pName = rulingParties.length > 0 ? rulingParties[0].name : "없음";
-            summaryHtml = `단독 집권 (${pName}): ${rulingSeats}석 (${rulingPct}%)`;
-        } else {
-            summaryHtml = `연립 정부 여당 의석: ${rulingSeats}석 (${rulingPct}%)`;
-        }
-        document.getElementById('coalition-summary-area').innerHTML = `<div class="coalition-summary">${summaryHtml}</div>`;
-
-        let listHtml = '';
-        parties.forEach(p => { 
-            listHtml += `<div class="party-item-compact"><img src="${p.logoUrl || ''}" style="${p.logoUrl ? '' : 'display:none'}"><span style="color: ${p.color};">${p.name} (${p.seats}석)</span>${p.isCoalition ? '<span class="coalition-badge">여당</span>' : ''}</div>`; 
-        });
-        document.getElementById('ui-party-list-compact').innerHTML = listHtml;
-
-        // 하단 요약 (상원)
-        if (parliamentType === '양원제') {
-            const rulingSeatsUpper = rulingParties.reduce((sum, p) => sum + (p.seatsUpper || 0), 0);
-            const rulingPctUpper = totalSeatsUpper > 0 ? ((rulingSeatsUpper / totalSeatsUpper) * 100).toFixed(1) : 0;
+        /**
+         * 국회 차트 밑에 나오는 요약 정보(여당 의석수 및 리스트)를 생성하는 공통 함수
+         */
+        function generateSummary(seatField, totalTargetSeats, targetSummaryArea, targetListArea) {
+            const rulingParties = displayParties.filter(p => isPartyRuling(p));
+            const rulingSeats = rulingParties.reduce((sum, p) => sum + (p[seatField] || 0), 0);
+            const rulingPct = totalTargetSeats > 0 ? ((rulingSeats / totalTargetSeats) * 100).toFixed(1) : 0;
             
-            let summaryHtmlUpper = '';
-            if (govType === 'single') {
-                const pName = rulingParties.length > 0 ? rulingParties[0].name : "없음";
-                summaryHtmlUpper = `단독 집권 (${pName}): ${rulingSeatsUpper}석 (${rulingPctUpper}%)`;
-            } else {
-                summaryHtmlUpper = `연립 정부 여당 의석: ${rulingSeatsUpper}석 (${rulingPctUpper}%)`;
-            }
-            document.getElementById('coalition-summary-area-upper').innerHTML = `<div class="coalition-summary">${summaryHtmlUpper}</div>`;
-
-            let listHtmlUpper = '';
-            parties.forEach(p => { 
-                listHtmlUpper += `<div class="party-item-compact"><img src="${p.logoUrl || ''}" style="${p.logoUrl ? '' : 'display:none'}"><span style="color: ${p.color};">${p.name} (${p.seatsUpper || 0}석)</span>${p.isCoalition ? '<span class="coalition-badge">여당</span>' : ''}</div>`; 
+            // 여당 그룹화 명칭 구성
+            let rulingNames = [];
+            let processedAlliances = new Set();
+            
+            rulingParties.forEach(p => {
+                if (p.allianceId) {
+                    // 동일한 연합은 한 번만 이름 출력
+                    if (!processedAlliances.has(p.allianceId)) {
+                        const al = alliances.find(a => a.id === p.allianceId);
+                        if (al) rulingNames.push(al.name + " (연합)");
+                        processedAlliances.add(p.allianceId);
+                    }
+                } else {
+                    rulingNames.push(p.name);
+                }
             });
-            document.getElementById('ui-party-list-compact-upper').innerHTML = listHtmlUpper;
+            
+            let rulingStr = rulingNames.join(', ') || "없음";
+            let summaryHtml = '';
+            
+            if (govType === 'single') {
+                summaryHtml = `단독 집권 [${rulingStr}] 총 의석: ${rulingSeats}석 (${rulingPct}%)`;
+            } else {
+                summaryHtml = `연립 정부 [${rulingStr}] 총 의석: ${rulingSeats}석 (${rulingPct}%)`;
+            }
+            
+            document.getElementById(targetSummaryArea).innerHTML = `<div class="coalition-summary">${summaryHtml}</div>`;
+
+            // 하단 정당 상세 리스트 생성 (배지 포함)
+            let listHtml = '';
+            displayParties.forEach(p => { 
+                let badgeHtml = '';
+                if (isPartyRuling(p)) badgeHtml += '<span class="coalition-badge">여당</span>';
+                
+                if (p.allianceId) {
+                    const al = alliances.find(a => a.id === p.allianceId);
+                    if (al) badgeHtml += `<span class="alliance-badge">${al.name}</span>`;
+                }
+
+                listHtml += `
+                    <div class="party-item-compact">
+                        <img src="${p.logoUrl || ''}" style="${p.logoUrl ? '' : 'display:none'}">
+                        <span style="color: ${p.color};">${p.name} (${p[seatField] || 0}석)</span>
+                        ${badgeHtml}
+                    </div>
+                `; 
+            });
+            document.getElementById(targetListArea).innerHTML = listHtml;
         }
 
+        // 하원 요약 적용
+        generateSummary('seats', totalSeats, 'coalition-summary-area', 'ui-party-list-compact');
+        
+        // 상원 요약 적용
+        if (parliamentType === '양원제') {
+            generateSummary('seatsUpper', totalSeatsUpper, 'coalition-summary-area-upper', 'ui-party-list-compact-upper');
+        }
+
+        // 우측 하단 상세 정보 박스(인포 박스) 렌더링
         const sel = parties.find(p => p.id === selectedPartyId);
         if (sel) { 
             const infoHtml = `
-                <div class="info-title">${sel.name}</div>
-                <div class="info-image-container"><img src="${sel.infoImageUrl || ''}" style="${sel.infoImageUrl ? '' : 'display:none'}"></div>
-                <div class="info-desc">${sel.description || "정보가 없습니다."}</div>
+                <div class="info-title" style="border-bottom-color: ${sel.color}">${sel.name}</div>
+                <div class="info-image-container">
+                    <img src="${sel.infoImageUrl || ''}" style="${sel.infoImageUrl ? '' : 'display:none'}">
+                </div>
+                <div class="info-desc">${sel.description || "등록된 정당 상세 정보가 없습니다."}</div>
             `;
-            document.getElementById('selected-party-info-box').innerHTML = infoHtml;
-            document.getElementById('selected-party-info-box').style.display = "flex";
             
-            if (document.getElementById('selected-party-info-box-upper')) {
-                document.getElementById('selected-party-info-box-upper').innerHTML = infoHtml;
-                document.getElementById('selected-party-info-box-upper').style.display = "flex";
+            const infoBoxLower = document.getElementById('selected-party-info-box');
+            infoBoxLower.innerHTML = infoHtml;
+            infoBoxLower.style.display = "flex";
+            
+            const infoBoxUpper = document.getElementById('selected-party-info-box-upper');
+            if (infoBoxUpper) {
+                infoBoxUpper.innerHTML = infoHtml;
+                infoBoxUpper.style.display = "flex";
             }
         } else {
+            // 선택된 정당이 없으면 박스 숨김
             document.getElementById('selected-party-info-box').style.display = "none";
             if (document.getElementById('selected-party-info-box-upper')) {
                 document.getElementById('selected-party-info-box-upper').style.display = "none";
@@ -1123,17 +2178,26 @@
         }
     }
 
+    /**
+     * 현재 시뮬레이터의 모든 상태를 JSON 포맷으로 직렬화하여 파일로 다운로드합니다.
+     */
     function saveDataAsJSON() {
         const data = {
+            // 정치 창 세팅
             leaderName: document.getElementById('input-leader-name').value,
             focusName: document.getElementById('input-focus-name').value,
             ideology: document.getElementById('input-ideology').value,
             subIdeo1: document.getElementById('input-sub-ideo-1-name').value,
             subIdeo2: document.getElementById('input-sub-ideo-2-name').value,
             leaderImg: document.getElementById('ui-leader-img').src,
+            
+            // 국회 창 세팅
             parliamentIcon: parliamentIconUrl,
             upperParliamentIcon: upperParliamentIconUrl,
             showMajorityLine: document.getElementById('input-show-majority-line').checked,
+            showRulingHighlight: document.getElementById('input-show-ruling-highlight').checked,
+            
+            // 제도 시스템 세팅
             parliamentType: parliamentType,
             govType: govType,
             singleName: singleName,
@@ -1141,27 +2205,44 @@
             upperName: upperName,
             totalSeatsLower: document.getElementById('input-total-seats-target').value,
             totalSeatsUpper: document.getElementById('input-total-seats-upper').value,
-            selectedPartyId, parties
+            
+            // 데이터 배열
+            alliances: alliances,
+            allianceIdCounter: allianceIdCounter,
+            selectedPartyId: selectedPartyId, 
+            parties: parties,
+            partyIdCounter: partyIdCounter
         };
+        
+        // 데이터 블롭 생성 및 자동 다운로드 트리거
         const dl = document.createElement('a');
         dl.setAttribute("href", "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data)));
-        dl.setAttribute("download", "TFRKP_Data.json");
+        dl.setAttribute("download", "TFRKP_Simulation_Data.json");
         dl.click();
     }
 
+    /**
+     * 저장된 JSON 파일을 파싱하여 시뮬레이터의 상태를 복원합니다.
+     * 
+     * @param {Event} event - File input onChange 이벤트
+     */
     function loadDataFromJSON(event) {
         const file = event.target.files[0];
         if (!file) return;
+        
         const reader = new FileReader();
         reader.onload = (e) => {
             try {
                 const d = JSON.parse(e.target.result);
+                
+                // 정치 창 복원
                 document.getElementById('input-leader-name').value = d.leaderName;
                 document.getElementById('ui-leader-name').innerText = d.leaderName;
                 document.getElementById('input-focus-name').value = d.focusName;
                 document.getElementById('ui-focus-name').innerText = d.focusName;
                 document.getElementById('input-ideology').value = d.ideology;
                 document.getElementById('ui-ideology').innerText = d.ideology;
+                
                 if(d.subIdeo1) {
                     document.getElementById('input-sub-ideo-1-name').value = d.subIdeo1;
                     document.getElementById('ui-sub-ideo-1').innerText = d.subIdeo1;
@@ -1170,7 +2251,12 @@
                     document.getElementById('input-sub-ideo-2-name').value = d.subIdeo2;
                     document.getElementById('ui-sub-ideo-2').innerText = d.subIdeo2;
                 }
-                if(d.leaderImg) { document.getElementById('ui-leader-img').src = d.leaderImg; document.getElementById('preview-ui-leader-img').src = d.leaderImg; }
+                if(d.leaderImg) { 
+                    document.getElementById('ui-leader-img').src = d.leaderImg; 
+                    document.getElementById('preview-ui-leader-img').src = d.leaderImg; 
+                }
+                
+                // 로고 복원
                 if(d.parliamentIcon) { 
                     parliamentIconUrl = d.parliamentIcon; 
                     document.getElementById('preview-parliament-icon').src = d.parliamentIcon;
@@ -1181,10 +2267,16 @@
                     document.getElementById('preview-parliament-icon-upper').src = d.upperParliamentIcon;
                     document.getElementById('ui-parliament-icon-small-upper').src = d.upperParliamentIcon;
                 }
+                
+                // 토글 스위치 복원
                 if(d.showMajorityLine !== undefined) {
                     document.getElementById('input-show-majority-line').checked = d.showMajorityLine;
                 }
+                if(d.showRulingHighlight !== undefined) {
+                    document.getElementById('input-show-ruling-highlight').checked = d.showRulingHighlight;
+                }
                 
+                // 명칭 복원
                 if(d.singleName) { 
                     singleName = d.singleName; 
                     document.getElementById('input-single-name').value = singleName; 
@@ -1198,11 +2290,11 @@
                     document.getElementById('input-upper-name').value = upperName; 
                 }
 
-                // 단원/양원, 단독/연립 데이터 로드
+                // 제도 및 룰 복원
                 if(d.parliamentType) {
                     parliamentType = d.parliamentType;
                     document.querySelector(`input[name="parliament-type"][value="${parliamentType}"]`).checked = true;
-                    updateParliamentType(parliamentType); // UI 토글 동기화
+                    updateParliamentType(parliamentType); // 관련 UI 토글
                 }
                 if(d.govType) {
                     govType = d.govType;
@@ -1211,27 +2303,57 @@
                 if(d.totalSeatsLower) document.getElementById('input-total-seats-target').value = d.totalSeatsLower;
                 if(d.totalSeatsUpper) document.getElementById('input-total-seats-upper').value = d.totalSeatsUpper;
 
-                parties = d.parties; selectedPartyId = d.selectedPartyId;
+                // 정당, 연합, 카운터 복원
+                alliances = d.alliances || [];
+                allianceIdCounter = d.allianceIdCounter || 10;
+                parties = d.parties || []; 
+                partyIdCounter = d.partyIdCounter || 100;
+                selectedPartyId = d.selectedPartyId;
                 
+                // 화면 전체 재구성
                 updateLabelsAndButtons();
+                renderAllianceTable();
                 renderControls(); 
                 renderDashboard(); 
                 renderDetailsTable(); 
-                alert("데이터 로드 완료");
-            } catch(e) { alert("로드 실패: 잘못된 파일입니다."); }
+                
+                alert("데이터 로드 완료! 시뮬레이터가 성공적으로 복원되었습니다.");
+            } catch(e) { 
+                console.error(e);
+                alert("로드 실패: 호환되지 않거나 손상된 JSON 파일입니다."); 
+            }
+            
+            // 동일 파일 연속 업로드 가능하도록 input 초기화
             event.target.value = '';
         };
         reader.readAsText(file);
     }
 
+    /**
+     * html2canvas 라이브러리를 이용하여 지정된 DOM 영역을 고화질 PNG 이미지로 캡처하여 저장합니다.
+     * 
+     * @param {string} targetId - 캡처할 DOM 엘리먼트 ID
+     * @param {string} nameSuffix - 저장될 파일명에 붙일 접미사
+     */
     function saveImage(targetId, nameSuffix) {
         const area = document.getElementById(targetId);
         if (!area) return;
-        html2canvas(area, { useCORS: true, backgroundColor: "#050505", scale: 2 }).then(canvas => {
+        
+        // 외부 이미지가 섞여있을 수 있으므로 useCORS 옵션 활성화, 고해상도를 위해 scale: 2 적용
+        html2canvas(area, { 
+            useCORS: true, 
+            backgroundColor: "#050505", 
+            scale: 2,
+            logging: false
+        }).then(canvas => {
             let link = document.createElement('a'); 
-            link.download = `TFRKP_Simulation_${nameSuffix}.png`; 
+            let dateStr = new Date().toISOString().slice(0,10).replace(/-/g,"");
+            link.download = `TFRKP_Simulation_${nameSuffix}_${dateStr}.png`; 
             link.href = canvas.toDataURL('image/png'); 
             link.click();
+        }).catch(err => {
+            console.error("Image Capture Error: ", err);
+            alert("이미지 저장 중 오류가 발생했습니다. 개발자 도구 콘솔을 확인하세요.");
         });
     }
 </script>
