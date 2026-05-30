@@ -705,28 +705,30 @@
             color: #aaaaaa; 
         }
         
+        /* 파이 차트 박스 (1:1 비율 고정 및 텍스트 1줄 유지 핵심 영역) */
         .party-box { 
             flex: 1; 
             background: #0c0c0c; 
             border: 1px solid #444444; 
             display: flex; 
             padding: 20px; 
-            gap: 15px; 
+            gap: 20px; 
             box-sizing: border-box; 
             align-items: center; 
             box-shadow: inset 0 0 10px rgba(0,0,0,0.8); 
-            overflow: hidden; /* 차트 박스 영역 밖으로 나가는 글자 숨김 */
+            overflow: hidden; 
         }
         
-        /* [중요 요건 반영] 파이 차트 크기를 축소하여 텍스트 영역 확보, 완벽한 1:1 고정 */
         .pie-container { 
             position: relative; 
+            /* 차트 크기를 85px로 줄여 텍스트 공간을 충분히 확보 */
             width: 85px; 
             height: 85px; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
-            flex-shrink: 0; /* 차트 찌그러짐 원천 차단 */
+            /* 화면이 좁아져도 절대 찌그러지지 않도록 1:1 강제 고정 */
+            flex-shrink: 0; 
             aspect-ratio: 1 / 1; 
         }
         
@@ -750,7 +752,6 @@
             aspect-ratio: 1 / 1; 
         }
         
-        /* [중요 요건 반영] 정당명 1줄 고정 (말줄임표 없이 전체 표기) */
         .party-list-sm { 
             flex: 1; 
             display: flex; 
@@ -759,12 +760,13 @@
             overflow: visible; 
         }
         
+        /* 정당명이 절대 줄바꿈 되지 않게 nowrap 처리 */
         .party-row-sm { 
             display: flex; 
             align-items: center; 
-            font-size: 13.5px; 
+            font-size: 14px; 
             color: #dddddd; 
-            white-space: nowrap; /* 줄바꿈 절대 방지 */
+            white-space: nowrap; 
             width: 100%; 
         }
         
@@ -773,16 +775,6 @@
             height: 14px; 
             margin-right: 8px; 
             border: 1px solid #000000; 
-            flex-shrink: 0; 
-        }
-        
-        .party-name-text { 
-            white-space: nowrap; 
-        }
-        
-        .party-seats-text { 
-            margin-left: auto; 
-            padding-left: 5px; 
             flex-shrink: 0; 
         }
 
@@ -942,11 +934,11 @@
             <div class="input-box">
                 <label>지도자 이름</label>
                 <!-- 디바운스를 위해 oninput 내에 직접 텍스트 변경 로직 작성 (빠른 피드백) -->
-                <input type="text" id="input-leader-name" value="김민준" oninput="document.getElementById('ui-leader-name').innerText=this.value || '[지도자 이름]'">
+                <input type="text" id="input-leader-name" value="이대명" oninput="document.getElementById('ui-leader-name').innerText=this.value || '[지도자 이름]'">
             </div>
             <div class="input-box">
                 <label>국가 중점 명칭</label>
-                <input type="text" id="input-focus-name" value="새로운 도약" oninput="document.getElementById('ui-focus-name').innerText=this.value || '[국가 중점]'">
+                <input type="text" id="input-focus-name" value="민생 회복 조치" oninput="document.getElementById('ui-focus-name').innerText=this.value || '[국가 중점]'">
             </div>
         </div>
         <div class="input-row">
@@ -1047,8 +1039,9 @@
                     <label style="margin:0; color: #fff; cursor: pointer;" for="input-show-majority-line">차트: 과반수 기준선 표시</label>
                 </div>
                 <div style="display: flex; align-items: center; gap: 8px;">
+                    <!-- 여당 강조선(Ruling Highlight) On/Off -->
                     <input type="checkbox" id="input-show-ruling-highlight" checked onchange="debouncedRenderDashboard()">
-                    <label style="margin:0; color: #fff; cursor: pointer;" for="input-show-ruling-highlight">차트: 집권 세력(여당) 강조 테두리 표시</label>
+                    <label style="margin:0; color: #fff; cursor: pointer;" for="input-show-ruling-highlight">차트: 집권 세력(여당) 강조선 표시</label>
                 </div>
             </div>
         </div>
@@ -1127,7 +1120,7 @@
         </div>
     </div>
 
-    <!-- 하단 액션 버튼 그룹 -->
+    <!-- 하단 액션 버튼 그룹 (Alert 없이 조용히 동작함) -->
     <div class="data-action-row">
         <button class="btn-save-json" onclick="saveDataAsJSON()">데이터 설정 저장 (JSON)</button>
         <label for="load-json-input" class="btn-load-json">데이터 불러오기 (JSON)</label>
@@ -1158,12 +1151,12 @@
                 <div class="politics-top">
                     <div class="leader-box">
                         <img id="ui-leader-img" class="leader-img" src="" alt="Leader">
-                        <div class="leader-name" id="ui-leader-name">김민준</div>
+                        <div class="leader-name" id="ui-leader-name">이대명</div>
                     </div>
                     <div class="focus-box">
                         <div class="focus-current">
                             <div class="focus-inner-glow-frame"></div>
-                            <div class="focus-text" id="ui-focus-name">새로운 도약</div>
+                            <div class="focus-text" id="ui-focus-name">민생 회복 조치</div>
                             <div class="focus-progress"><div class="focus-progress-fill"></div></div>
                         </div>
                     </div>
@@ -1257,8 +1250,35 @@
         });
     }
 
-    // [최적화] 디바운스 타이머 설정 (입력 시 렉 방지 목적)
-    // 텍스트를 빠르게 입력할 때 화면을 그리지 않고, 입력이 멈춘 후 50ms 뒤에 한 번만 그려줌
+    /* 
+     * [치명적 버그 수정] SVG 호를 그리기 위한 필수 수학 함수 
+     * 이 코드가 없으면 국회 반원 차트가 렌더링되지 않고 빈 화면(검은화면)이 뜹니다.
+     */
+    function polarToCartesian(centerX, centerY, radius, angleInRadians) {
+        return {
+            x: centerX + (radius * Math.cos(angleInRadians)),
+            y: centerY - (radius * Math.sin(angleInRadians))
+        };
+    }
+
+    function describeArc(x, y, innerRadius, outerRadius, startAngle, endAngle) {
+        const startOut = polarToCartesian(x, y, outerRadius, startAngle);
+        const endOut = polarToCartesian(x, y, outerRadius, endAngle);
+        const endIn = polarToCartesian(x, y, innerRadius, endAngle);
+        const startIn = polarToCartesian(x, y, innerRadius, startAngle);
+        
+        // 반원(Donut slice)을 그리는 SVG Path 커맨드
+        return [
+            "M", startOut.x, startOut.y,
+            "A", outerRadius, outerRadius, 0, 0, 1, endOut.x, endOut.y,
+            "L", endIn.x, endIn.y,
+            "A", innerRadius, innerRadius, 0, 0, 0, startIn.x, startIn.y,
+            "Z"
+        ].join(" ");
+    }
+
+    // [성능 최적화] 입력 렉(Lag) 및 포커스 해제 방지를 위한 디바운스 타이머 설정
+    // 50ms는 너무 빨라 입력 도중 리렌더링이 일어나 버벅거리므로 250ms로 상향 조정함
     let dashboardRenderTimer = null;
     function debouncedRenderDashboard() {
         if (dashboardRenderTimer) {
@@ -1266,7 +1286,7 @@
         }
         dashboardRenderTimer = setTimeout(() => {
             renderDashboard();
-        }, 50);
+        }, 250);
     }
 
     // 시스템 상태 변수 (고유 ID 관리용)
@@ -1299,7 +1319,7 @@
         debouncedRenderDashboard();
     }
 
-    /* 저장 버튼과 라벨 텍스트 업데이트 (단원제/양원제 전환 시 호출됨) */
+    /* 저장 버튼과 라벨 텍스트 업데이트 */
     function updateLabelsAndButtons() {
         const label = document.getElementById('label-parliament-logo');
         const labelUpper = document.getElementById('label-parliament-logo-upper');
@@ -1325,7 +1345,6 @@
     /* 단원제 / 양원제 토글 기능 */
     function updateParliamentType(val) {
         parliamentType = val;
-        // 양원제 전용 엘리먼트 토글
         const bicameralElements = document.querySelectorAll('.bicameral-only');
         bicameralElements.forEach(el => {
             if (val === '양원제') {
@@ -1334,7 +1353,6 @@
                 el.style.display = 'none';
             }
         });
-        // 단원제 전용 엘리먼트 토글
         const unicameralElements = document.querySelectorAll('.unicameral-only');
         unicameralElements.forEach(el => {
             if (val === '단원제') {
@@ -1389,28 +1407,35 @@
     }
     
     /* 
-       [매우 중요 버그 픽스] 연합 정보 업데이트 시 포커스 해제 문제 해결
-       - 이름(name)을 입력할 때는 전체 AllianceTable을 다시 그리지 않음으로써 포커스가 날아가는 현상 차단 
+       [타이핑 렉 및 포커스 상실 버그 완벽 해결] 
+       연합 이름을 입력할 때 DOM을 아예 엎어치지 않고(innerHTML=''), 오직 데이터 변경과 지연 렌더링(Debounce)만 수행합니다.
     */
-    function updateAlliance(id, field, value) {
+    function handleAllianceNameInput(id, value) {
         const al = alliances.find(a => a.id === id);
         if (al) {
-            al[field] = value;
-            
-            if (field === 'isRuling') {
-                if (govType === 'single' && value === true) {
-                    // 단독 집권인 경우 다른 모든 연합 및 독자 정당의 집권 여부를 해제
-                    alliances.forEach(otherAl => { if(otherAl.id !== id) otherAl.isRuling = false; });
-                    parties.forEach(p => p.isCoalition = false);
-                }
-                renderAllianceTable(); // 체크박스를 클릭했을 때는 다시 그려도 무관함
-                renderControls(); // 4번 창의 체크박스 동기화
-            } else if (field === 'name') {
-                // 이름을 수정할 때는 renderAllianceTable() 호출을 생략하여 포커스를 유지함
-                renderControls(); // 하위 정당들의 select 옵션 이름 갱신을 위해 4번 창만 업데이트
+            al.name = value;
+            // 이름을 바꿀 때마다 컨트롤 창(셀렉트 박스 등) 전체를 엎어버리면 포커스가 날아가므로,
+            // 4번 표와 전체 대시보드 렌더링만 '지연(Debounce)' 처리하여 입력 렉을 방지합니다.
+            if (dashboardRenderTimer) clearTimeout(dashboardRenderTimer);
+            dashboardRenderTimer = setTimeout(() => {
+                renderControls(); // 하위 정당 셀렉트 박스 명칭 갱신
+                renderDashboard();
+            }, 300);
+        }
+    }
+
+    function updateAllianceRuling(id, value) {
+        const al = alliances.find(a => a.id === id);
+        if (al) {
+            al.isRuling = value;
+            if (govType === 'single' && value === true) {
+                alliances.forEach(otherAl => { if(otherAl.id !== id) otherAl.isRuling = false; });
+                parties.forEach(p => p.isCoalition = false);
             }
-            
-            debouncedRenderDashboard(); // 우측 시각화 갱신
+            // 라디오버튼이나 체크박스를 '클릭'하는 이벤트는 바로 화면을 다시 그려도 포커스 문제가 없음
+            renderAllianceTable(); 
+            renderControls(); 
+            renderDashboard();
         }
     }
 
@@ -1420,12 +1445,12 @@
         tbody.innerHTML = '';
         alliances.forEach(a => {
             let rulingInputHtml = govType === 'coalition' 
-                ? `<input type="checkbox" onchange="updateAlliance(${a.id}, 'isRuling', this.checked)" ${a.isRuling ? 'checked' : ''}>`
-                : `<input type="radio" name="ruling-radio" onchange="updateAlliance(${a.id}, 'isRuling', true)" ${a.isRuling ? 'checked' : ''}>`;
+                ? `<input type="checkbox" onchange="updateAllianceRuling(${a.id}, this.checked)" ${a.isRuling ? 'checked' : ''}>`
+                : `<input type="radio" name="ruling-radio" onchange="updateAllianceRuling(${a.id}, true)" ${a.isRuling ? 'checked' : ''}>`;
             let tr = document.createElement('tr');
-            // autocomplete="off"를 추가하여 브라우저 자동완성이 입력을 방해하지 않도록 함
+            // autocomplete="off"를 추가하여 자동완성이 입력을 방해하지 않도록 함
             tr.innerHTML = `
-                <td><input type="text" autocomplete="off" value="${a.name}" oninput="updateAlliance(${a.id}, 'name', this.value)"></td>
+                <td><input type="text" autocomplete="off" value="${a.name}" oninput="handleAllianceNameInput(${a.id}, this.value)"></td>
                 <td>${rulingInputHtml}</td>
                 <td><button class="btn-del" onclick="removeAlliance(${a.id})">X</button></td>
             `;
@@ -1466,7 +1491,7 @@
         // 각 정당의 지지도에 오차 범위(Swing)를 적용하여 새로운 지지율 생성
         let adjustedParties = parties.map(p => {
             let margin = parseFloat(p.errorMargin) || 0;
-            let swing = (Math.random() * margin * 2) - margin; // -margin ~ +margin 사이 무작위 값
+            let swing = (Math.random() * margin * 2) - margin; 
             let baseSupport = parseFloat(p.support) || 0;
             return { ...p, tempSupport: Math.max(0.1, baseSupport + swing) };
         });
@@ -1474,7 +1499,7 @@
         let totalAdjustedSupport = adjustedParties.reduce((sum, p) => sum + p.tempSupport, 0);
         if (totalAdjustedSupport === 0) return;
 
-        // 의석 할당 내부 함수 (하원/상원 공통 로직)
+        // 의석 할당 내부 함수
         function assignSeats(seatField, targetTotal) {
             let seatsAssigned = 0;
             let calculations = adjustedParties.map(p => {
@@ -1484,7 +1509,7 @@
                 return { id: p.id, exact, floor, remainder: exact - floor };
             });
             
-            // 소수점 잔여값이 큰 순서대로 남은 의석을 1석씩 추가 할당
+            // 소수점 잔여값이 큰 순서대로 남은 의석을 1석씩 할당
             let remainingSeats = targetTotal - seatsAssigned;
             calculations.sort((a, b) => b.remainder - a.remainder);
             for (let i = 0; i < remainingSeats; i++) { calculations[i].floor += 1; }
@@ -1496,9 +1521,7 @@
         }
         
         assignSeats('seats', totalSeatsTarget);
-        if (parliamentType === '양원제') {
-            assignSeats('seatsUpper', totalSeatsUpperTarget);
-        }
+        if (parliamentType === '양원제') assignSeats('seatsUpper', totalSeatsUpperTarget);
         
         renderControls(); 
         debouncedRenderDashboard();
@@ -1522,7 +1545,6 @@
         renderDetailsTable();
     }
 
-    /* 전역 환경(헤더, 지도자 이미지 등) 파일 업로드 콜백 */
     function handleFileUploadGlobal(event, targetId, previewId) {
         const file = event.target.files[0];
         if (file) {
@@ -1546,120 +1568,107 @@
         }
     }
 
-    /* 표 내부 행별 이미지 업로드 콜백 */
     function handleRowFileUpload(event, id, field) {
         const file = event.target.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = (e) => { 
-                updateParty(id, field, e.target.result); 
-                renderDetailsTable(); // 이미지가 렌더링되도록 5번 표만 다시 그림
+                updatePartyField(id, field, e.target.result); 
+                renderDetailsTable(); // 이미지만 렌더링
             };
             reader.readAsDataURL(file);
         }
     }
 
-    /* 정당 데이터 추가 */
+    /* 정당 데이터 추가/삭제 */
     function addParty() {
         parties.push({ 
-            id: partyIdCounter++, 
-            name: "신규 정당", 
-            color: "#888888", 
-            seats: 0, 
-            seatsUpper: 0, 
-            support: 0, 
-            errorMargin: 3.0, 
-            isCoalition: false, 
-            allianceId: null, 
-            logoUrl: '', 
-            infoImageUrl: '', 
-            description: "새로 추가된 정당입니다." 
+            id: partyIdCounter++, name: "신규 정당", color: "#888888", 
+            seats: 0, seatsUpper: 0, support: 0, errorMargin: 3.0, 
+            isCoalition: false, allianceId: null, logoUrl: '', infoImageUrl: '', description: "새 정당입니다." 
         });
-        renderControls(); 
-        debouncedRenderDashboard(); 
-        renderDetailsTable();
+        renderControls(); debouncedRenderDashboard(); renderDetailsTable();
     }
 
-    /* 정당 데이터 삭제 */
     function removeParty(id) {
         parties = parties.filter(p => p.id !== id);
-        // 삭제된 정당이 우측 하단 포커스 정당이었다면 리스트의 첫 정당으로 포커스 이동
         if (selectedPartyId === id && parties.length > 0) selectedPartyId = parties[0].id;
         else if (parties.length === 0) selectedPartyId = null;
-        
-        renderControls(); 
-        debouncedRenderDashboard(); 
-        renderDetailsTable();
+        renderControls(); debouncedRenderDashboard(); renderDetailsTable();
     }
 
-    /* 우측 하단 상세 인포 박스에 띄울 정당 선택 */
     function selectPartyInfo(id) { 
-        selectedPartyId = id; 
-        renderControls(); 
-        debouncedRenderDashboard(); 
+        selectedPartyId = id; renderControls(); debouncedRenderDashboard(); 
     }
 
-    /* 정당 데이터 개별 속성(의석, 지지율 등) 실시간 업데이트 */
-    function updateParty(id, field, value) {
+    /* 
+       [타이핑 렉 및 포커스 상실 방지] 
+       정당 이름을 입력할 때 DOM 전체 갱신을 우회하여 사용성을 극대화합니다.
+    */
+    function handlePartyNameInput(id, value) {
         const party = parties.find(p => p.id === id);
         if (party) {
-            // 숫자로 처리해야 하는 필드들
+            party.name = value;
+            // 5번 상세설명 표의 이름은 즉시 반영하여 체감 속도 향상
+            const detailNameTd = document.getElementById(`detail-name-${id}`);
+            if (detailNameTd) detailNameTd.innerText = value;
+            
+            // 입력 도중에는 렌더링을 멈추고(Lag 방지) 입력이 끝나면 시각화 창 갱신
+            debouncedRenderDashboard();
+        }
+    }
+
+    // 숫자가 변경되거나 속성이 변경될 때 호출
+    function updatePartyField(id, field, value) {
+        const party = parties.find(p => p.id === id);
+        if (party) {
             if (['seats', 'seatsUpper', 'support', 'errorMargin'].includes(field)) {
                 party[field] = parseFloat(value) || 0;
             } else {
                 party[field] = value;
             }
-            
-            // 이름이 바뀔 경우 5번 창(상세 테이블)의 텍스트도 포커스 해제 없이 개별 요소로 교체
-            if (field === 'name') {
-                const detailNameTd = document.getElementById(`detail-name-${id}`);
-                if (detailNameTd) detailNameTd.innerText = value;
-            }
-            
-            // 연합 선택 변경 시 다른 UI 요소(여당 체크박스 락 기능 등) 반영을 위해 4번 표 다시 그리기
-            if (field === 'allianceId') renderControls();
-            
+            if (field === 'allianceId') renderControls(); // 동맹 변경 시 여당 체크박스 상태 갱신 필요
             debouncedRenderDashboard();
         }
     }
 
     /* ==========================================
-       앱 구동 초기화 및 가상 샘플 데이터 세팅
+       앱 구동 초기화 및 가상 현실모티브 정당 세팅
        ========================================== */
     window.addEventListener('DOMContentLoaded', () => {
         document.getElementById('ui-leader-img').style.backgroundColor = "#222";
         
-        // 현실 정치를 모티브로 한 가상의 샘플 데이터 (요구사항 반영)
-        // 첫 번째 연합을 기본 집권 여당(isRuling: true)으로 설정하여 강조선이 보이도록 함
+        // 현실의 정치 지형(민주당, 보수당, 제3지대 등)을 모티브로 한 가상 샘플 데이터
         alliances = [
-            { id: 1, name: "희망과 진보 연합", isRuling: true }, 
-            { id: 2, name: "자유와 질서 동맹", isRuling: false }
+            { id: 1, name: "민주 진보 연합", isRuling: true }, // 기본 집권 여당 세력
+            { id: 2, name: "국민 보수 동맹", isRuling: false }
         ];
 
         parties = [
-            { id: 1, name: "미래평화당", color: "#1b499b", seats: 155, seatsUpper: 50, support: 43.2, errorMargin: 3.5, isCoalition: true, allianceId: 1, logoUrl: '', infoImageUrl: '', description: "시민의 권리와 복지를 최우선으로 삼는 중도진보 성향의 제1정당입니다." },
-            { id: 2, name: "국민보수당", color: "#e61e2b", seats: 115, seatsUpper: 40, support: 38.5, errorMargin: 4.2, isCoalition: false, allianceId: 2, logoUrl: '', infoImageUrl: '', description: "자유 시장 경제와 굳건한 국가 안보를 중시하는 보수 정당입니다." },
-            { id: 3, name: "정의혁신당", color: "#ffc107", seats: 15, seatsUpper: 6, support: 8.3, errorMargin: 2.1, isCoalition: false, allianceId: 1, logoUrl: '', infoImageUrl: '', description: "노동권 강화와 사회적 평등을 강력히 주장하는 진보 정당입니다." },
-            { id: 4, name: "자유개혁당", color: "#ff7f00", seats: 10, seatsUpper: 2, support: 5.0, errorMargin: 1.5, isCoalition: false, allianceId: 2, logoUrl: '', infoImageUrl: '', description: "청년 세대의 목소리와 합리적 개혁을 추구하는 제3지대 정당입니다." },
-            { id: 5, name: "무소속", color: "#888888", seats: 5, seatsUpper: 2, support: 5.0, errorMargin: 5.0, isCoalition: false, allianceId: null, logoUrl: '', infoImageUrl: '', description: "특정 당적을 보유하지 않은 독립 의원들입니다." }
+            // 제 1당 (여당)
+            { id: 1, name: "미래민주당", color: "#1b499b", seats: 168, seatsUpper: 50, support: 45.2, errorMargin: 3.5, isCoalition: false, allianceId: 1, logoUrl: '', infoImageUrl: '', description: "시민의 권리와 복지, 그리고 실용적 진보를 최우선 가치로 삼는 여당입니다." },
+            // 제 2당 (야당)
+            { id: 2, name: "국민보수당", color: "#e61e2b", seats: 111, seatsUpper: 40, support: 38.5, errorMargin: 4.2, isCoalition: false, allianceId: 2, logoUrl: '', infoImageUrl: '', description: "자유 시장 경제와 굳건한 국가 안보를 중시하는 강력한 보수 야당입니다." },
+            // 소수 정당 (제 3지대 및 진보)
+            { id: 3, name: "녹색시민당", color: "#22aa44", seats: 6, seatsUpper: 2, support: 5.3, errorMargin: 1.1, isCoalition: false, allianceId: 1, logoUrl: '', infoImageUrl: '', description: "기후 위기 대응과 환경 보호, 그리고 직접 민주주의를 주장하는 소수 진보 정당입니다." },
+            // 무소속
+            { id: 4, name: "무소속", color: "#808080", seats: 15, seatsUpper: 8, support: 11.0, errorMargin: 5.0, isCoalition: false, allianceId: null, logoUrl: '', infoImageUrl: '', description: "특정 당적을 보유하지 않고 지역구의 민심만을 대변하는 독립 의원들입니다." }
         ];
 
-        selectedPartyId = 1; // 미래평화당을 기본 포커스
+        selectedPartyId = 1; // 미래민주당 기본 포커스
 
-        // 드래그 앤 드롭 존 설정
+        // 드래그 앤 드롭 존 리스너 연결
         setupDragAndDrop('drop-leader', (data) => {
             const uiImg = document.getElementById('ui-leader-img');
             uiImg.src = data; uiImg.style.display = "block"; uiImg.style.backgroundColor = "transparent";
             document.getElementById('preview-ui-leader-img').src = data;
         });
-        
         setupDragAndDrop('drop-parliament', (data) => {
             parliamentIconUrl = data;
             document.getElementById('preview-parliament-icon').src = data;
             document.getElementById('ui-parliament-icon-small').src = data; 
             debouncedRenderDashboard(); 
         });
-        
         setupDragAndDrop('drop-parliament-upper', (data) => {
             upperParliamentIconUrl = data;
             document.getElementById('preview-parliament-icon-upper').src = data;
@@ -1667,19 +1676,17 @@
             debouncedRenderDashboard(); 
         });
 
-        // 렌더링 호출
+        // 최초 렌더링 실행
         updateLabelsAndButtons();
         renderAllianceTable();
         renderControls();
-        debouncedRenderDashboard();
+        renderDashboard();
         renderDetailsTable();
     });
 
     /* ==========================================
        UI 렌더링 함수들 (좌측 표 및 패널 렌더러)
        ========================================== */
-       
-    // 4번 창: 정당 기본 데이터 및 의석 설정 테이블
     function renderControls() {
         const tbody = document.getElementById('controls-tbody');
         tbody.innerHTML = '';
@@ -1689,7 +1696,6 @@
             let isRuling = isPartyRuling(p);
             let rulingInputHtml = '';
             
-            // 연합에 소속된 경우, 개별 여당 설정은 불가능(Disabled)하고 연합의 상태를 따름
             if (p.allianceId) {
                 rulingInputHtml = `<input type="checkbox" disabled ${isRuling ? 'checked' : ''} title="소속 연합의 집권 설정을 따릅니다.">`;
             } else {
@@ -1700,8 +1706,7 @@
                 }
             }
 
-            // 소속 연합 선택 셀렉트 박스 구성
-            let allianceSelect = `<select style="width:100%; padding: 6px; font-size:12px;" onchange="updateParty(${p.id}, 'allianceId', this.value ? parseInt(this.value) : null)">
+            let allianceSelect = `<select style="width:100%; padding: 6px; font-size:12px;" onchange="updatePartyField(${p.id}, 'allianceId', this.value ? parseInt(this.value) : null)">
                 <option value="">(무소속/독자)</option>
                 ${alliances.map(a => `<option value="${a.id}" ${p.allianceId === a.id ? 'selected' : ''}>[동맹] ${a.name}</option>`).join('')}
             </select>`;
@@ -1715,19 +1720,18 @@
                 <td><input type="checkbox" class="square-check" title="시각화 영역 우측 하단에 상세 정보를 표시합니다" onchange="selectPartyInfo(${p.id})" ${selectedPartyId === p.id ? 'checked' : ''}></td>
                 <td>${allianceSelect}</td>
                 <td>${rulingInputHtml}</td>
-                <td><input type="text" autocomplete="off" value="${p.name}" oninput="updateParty(${p.id}, 'name', this.value);"></td>
-                <td><input type="color" value="${p.color}" onchange="updateParty(${p.id}, 'color', this.value)"></td>
-                <td><input type="number" value="${p.support}" step="0.1" min="0" max="100" oninput="updateParty(${p.id}, 'support', this.value)"></td>
-                <td><input type="number" value="${p.errorMargin}" step="0.1" min="0" oninput="updateParty(${p.id}, 'errorMargin', this.value)"></td>
-                <td><input type="number" value="${p.seats}" min="0" oninput="updateParty(${p.id}, 'seats', this.value)"></td>
-                <td class="bicameral-only" style="${upperStyle}"><input type="number" value="${p.seatsUpper || 0}" min="0" oninput="updateParty(${p.id}, 'seatsUpper', this.value)"></td>
+                <td><input type="text" autocomplete="off" value="${p.name}" oninput="handlePartyNameInput(${p.id}, this.value);"></td>
+                <td><input type="color" value="${p.color}" onchange="updatePartyField(${p.id}, 'color', this.value)"></td>
+                <td><input type="number" value="${p.support}" step="0.1" min="0" max="100" oninput="updatePartyField(${p.id}, 'support', this.value)"></td>
+                <td><input type="number" value="${p.errorMargin}" step="0.1" min="0" oninput="updatePartyField(${p.id}, 'errorMargin', this.value)"></td>
+                <td><input type="number" value="${p.seats}" min="0" oninput="updatePartyField(${p.id}, 'seats', this.value)"></td>
+                <td class="bicameral-only" style="${upperStyle}"><input type="number" value="${p.seatsUpper || 0}" min="0" oninput="updatePartyField(${p.id}, 'seatsUpper', this.value)"></td>
                 <td><button class="btn-del" onclick="removeParty(${p.id})">X</button></td>
             `;
             tbody.appendChild(tr);
         });
     }
 
-    // 5번 창: 정당 부가 미디어(사진) 및 상세정보 테이블
     function renderDetailsTable() {
         const tbody = document.getElementById('details-tbody');
         tbody.innerHTML = '';
@@ -1751,15 +1755,15 @@
                     </label>
                 </td>
                 <td>
-                    <textarea oninput="updateParty(${p.id}, 'description', this.value)" placeholder="정당 설명을 입력하세요...">${p.description || ''}</textarea>
+                    <!-- 텍스트 설명 작성 시에도 무거운 렌더링이 발생하지 않도록 필드만 조용히 업데이트 -->
+                    <textarea oninput="updatePartyField(${p.id}, 'description', this.value)" placeholder="정당 설명을 입력하세요...">${p.description || ''}</textarea>
                 </td>
             `;
             tbody.appendChild(tr);
             
-            // DOM이 실제로 추가된 직후에 드래그 앤 드롭 이벤트를 연결하기 위한 타이머
             setTimeout(() => {
-                setupDragAndDrop(`drop-detail-logo-${p.id}`, (data) => { updateParty(p.id, 'logoUrl', data); renderDetailsTable(); });
-                setupDragAndDrop(`drop-detail-info-${p.id}`, (data) => { updateParty(p.id, 'infoImageUrl', data); renderDetailsTable(); });
+                setupDragAndDrop(`drop-detail-logo-${p.id}`, (data) => { updatePartyField(p.id, 'logoUrl', data); renderDetailsTable(); });
+                setupDragAndDrop(`drop-detail-info-${p.id}`, (data) => { updatePartyField(p.id, 'infoImageUrl', data); renderDetailsTable(); });
             }, 0);
         });
     }
@@ -1768,7 +1772,7 @@
        시각화 창 렌더링 마스터 함수 (대시보드)
        ========================================== */
     function renderDashboard() {
-        // 화면에 보여주기 위한 표시용 배열. 소속 연합과 의석수 기준으로 재정렬
+        // 정당 표시용 배열 구성 (소속 연합, 의석순 정렬)
         let displayParties = [...parties].sort((a, b) => {
             let aAll = a.allianceId || 9999; let bAll = b.allianceId || 9999;
             if (aAll !== bAll) return aAll - bAll; return b.seats - a.seats; 
@@ -1790,12 +1794,11 @@
             gradientParts.push(`${p.color} ${currentPieAngle}% ${currentPieAngle + percentage}%`);
             currentPieAngle += percentage;
             
-            // 요구사항: 정당명이 1줄로 표시되며, 우측에 괄호로 의석수가 정확히 붙도록 설정 (flex 활용)
+            // 요구사항: 정당명이 1줄로 표시, 우측에 괄호로 의석수 표기. 연합 딱지 없음.
             smList.innerHTML += `
                 <div class="party-row-sm">
                     <div class="party-color-box" style="background-color: ${p.color};"></div>
-                    <span class="party-name-text">${p.name}</span>
-                    <span class="party-seats-text">(${p.seats})</span>
+                    ${p.name} <span style="margin-left:auto;">(${p.seats})</span>
                 </div>
             `;
         });
@@ -1805,7 +1808,7 @@
         const showMajorityLine = document.getElementById('input-show-majority-line').checked;
         const showRulingHighlight = document.getElementById('input-show-ruling-highlight').checked;
 
-        // [2] 국회/상원 반원 SVG 차트 공통 그리기 함수
+        // [2] 국회/상원 반원 SVG 차트 그리기 함수
         function drawParliamentChart(svgId, seatField, totalTargetSeats, iconUrl) {
             const svg = document.getElementById(svgId);
             if (!svg) return;
@@ -1821,28 +1824,29 @@
             const bgPathD = describeArc(300, 290, 80, 280, Math.PI, 0);
             svg.innerHTML += `<path d="${bgPathD}" fill="#1c1c1c" stroke="#000000" stroke-width="3" filter="url(#shadow)" />`;
 
-            // 각 정당의 지분(의석수)에 맞춰 아크 경로 생성
+            // 각 정당의 지분에 맞춰 아크 생성 (좌측부터 채워짐)
             if (totalTargetSeats > 0) {
                 let currentAngle = Math.PI;
                 displayParties.forEach(p => {
                     let s = p[seatField] || 0; if (s <= 0) return;
                     let sliceAngle = (s / totalTargetSeats) * Math.PI;
                     let endAngle = currentAngle - sliceAngle;
+                    
+                    // describeArc로 패스 계산
                     let pathD = describeArc(300, 290, 80, 280, currentAngle, endAngle);
                     
+                    // 여당 강조선(Ruling Highlight) 처리
                     let isRuling = isPartyRuling(p);
-                    
-                    // 여당 강조선(테두리) 적용 유무
                     let strokeColor = '#111111'; 
                     let strokeWidth = '2';
                     if (showRulingHighlight && isRuling) { 
-                        strokeColor = '#ffd700'; 
+                        strokeColor = '#ffd700'; // 금색 테두리
                         strokeWidth = '4'; 
                     }
                     
                     svg.innerHTML += `<path d="${pathD}" fill="${p.color}" stroke="${strokeColor}" stroke-width="${strokeWidth}" style="transition: all 0.3s;" />`;
                     
-                    // 로고 이미지가 있을 경우 섹터(아크) 위에 희미하게 블렌딩 처리
+                    // 정당 로고가 있으면 배경과 섞어서 연하게 렌더링
                     if (p.logoUrl) {
                         let clipId = `clip-${p.id}-${svgId}`;
                         svg.innerHTML += `<clipPath id="${clipId}"><path d="${pathD}" /></clipPath>`;
@@ -1854,7 +1858,7 @@
                 });
             }
 
-            // 과반수 수직 점선
+            // 과반수 기준 수직 점선
             if (showMajorityLine) {
                 svg.innerHTML += `
                     <line x1="300" y1="10" x2="300" y2="210" stroke="#ffffff" stroke-width="1.5" stroke-dasharray="5,5" opacity="0.8" />
@@ -1873,13 +1877,13 @@
             }
         }
 
-        // SVG 함수 호출
+        // 차트 렌더러 호출
         drawParliamentChart('parliament-svg', 'seats', totalSeats, parliamentIconUrl);
         if (parliamentType === '양원제') {
             drawParliamentChart('parliament-svg-upper', 'seatsUpper', totalSeatsUpper, upperParliamentIconUrl);
         }
 
-        // 창 헤더(Header)의 텍스트 및 로고 실시간 동기화
+        // 창 헤더(Header)의 텍스트 및 로고 동기화
         const parliamentHeaderTitle = document.getElementById('ui-parliament-header-title');
         parliamentHeaderTitle.innerHTML = `<img id="ui-parliament-icon-small" class="header-icon" src="${parliamentIconUrl}" crossorigin="anonymous" alt="icon">${parliamentType === '양원제' ? lowerName : singleName}`;
         
@@ -1888,7 +1892,7 @@
             parliamentHeaderTitleUpper.innerHTML = `<img id="ui-parliament-icon-small-upper" class="header-icon" src="${upperParliamentIconUrl}" crossorigin="anonymous" alt="icon">${upperName}`;
         }
 
-        // 국회 차트 하단 텍스트 및 정당 요약 리스트 생성 유틸
+        // [3] 하단 연립 정부 요약 및 정당 상세 리스트 생성
         function generateSummary(seatField, totalTargetSeats, targetSummaryArea, targetListArea) {
             const rulingParties = displayParties.filter(p => isPartyRuling(p));
             const rulingSeats = rulingParties.reduce((sum, p) => sum + (p[seatField] || 0), 0);
@@ -1900,7 +1904,7 @@
                 if (p.allianceId) {
                     if (!processedAlliances.has(p.allianceId)) {
                         const al = alliances.find(a => a.id === p.allianceId);
-                        if (al) rulingNames.push(al.name); // '연합' 글자 자체를 붙이지 않음. 이름 그대로만.
+                        if (al) rulingNames.push(al.name); // '연합' 글자만 표시하고 배지는 안붙임
                         processedAlliances.add(p.allianceId);
                     }
                 } else {
@@ -1911,13 +1915,12 @@
             let rulingStr = rulingNames.join(', ') || "없음";
             let summaryHtml = '';
             
-            // 요약 문구 조립
             if (govType === 'single') summaryHtml = `단독 집권 [${rulingStr}] 총 의석: ${rulingSeats}석 (${rulingPct}%)`;
             else summaryHtml = `연립 정부 [${rulingStr}] 총 의석: ${rulingSeats}석 (${rulingPct}%)`;
             
             document.getElementById(targetSummaryArea).innerHTML = `<div class="coalition-summary">${summaryHtml}</div>`;
 
-            // 요구사항: 하단 리스트의 여당, 연합 배지(딱지) 모두 제거. 순수 이름과 의석수만 표시
+            // 하단 정당 리스트 (배지 딱지 제거, 깔끔한 텍스트 렌더링)
             let listHtml = '';
             displayParties.forEach(p => { 
                 listHtml += `
@@ -1930,13 +1933,12 @@
             document.getElementById(targetListArea).innerHTML = listHtml;
         }
 
-        // 요약 함수 호출
         generateSummary('seats', totalSeats, 'coalition-summary-area', 'ui-party-list-compact');
         if (parliamentType === '양원제') {
             generateSummary('seatsUpper', totalSeatsUpper, 'coalition-summary-area-upper', 'ui-party-list-compact-upper');
         }
 
-        // [3] 우측 하단 개별 정당 상세정보 인포 박스 렌더링
+        // [4] 우측 하단 개별 정당 상세정보 인포 박스 렌더링
         const sel = parties.find(p => p.id === selectedPartyId);
         if (sel) { 
             const infoHtml = `
@@ -1964,7 +1966,7 @@
     /* ==========================================
        데이터 직렬화 및 파일 다운로드 (저장/불러오기)
        ========================================== */
-    // 모든 상태와 텍스트를 JSON 형태의 객체로 변환하여 파일 다운로드
+    // 알림 팝업(alert)은 렉을 유발하므로 완전히 제거하고, 무음(Silent)으로 처리합니다.
     function saveDataAsJSON() {
         const data = {
             leaderName: document.getElementById('input-leader-name').value, 
@@ -1994,10 +1996,8 @@
         dl.setAttribute("href", "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data)));
         dl.setAttribute("download", "TFRKP_Simulation_Data.json"); 
         dl.click();
-        // 팝업 알림이 렉을 유발한다는 사용자 피드백에 의해 alert, notification을 모두 삭제함
     }
 
-    // JSON 파일을 읽어서 모든 시스템 변수에 즉시 덮어쓰기
     function loadDataFromJSON(event) {
         const file = event.target.files[0]; 
         if (!file) return;
@@ -2005,43 +2005,35 @@
         reader.onload = (e) => {
             try {
                 const d = JSON.parse(e.target.result);
-                // 기본 텍스트 및 UI 복구
-                document.getElementById('input-leader-name').value = d.leaderName; document.getElementById('ui-leader-name').innerText = d.leaderName;
-                document.getElementById('input-focus-name').value = d.focusName; document.getElementById('ui-focus-name').innerText = d.focusName;
-                document.getElementById('input-ideology').value = d.ideology; document.getElementById('ui-ideology').innerText = d.ideology;
+                document.getElementById('input-leader-name').value = d.leaderName || ''; document.getElementById('ui-leader-name').innerText = d.leaderName || '';
+                document.getElementById('input-focus-name').value = d.focusName || ''; document.getElementById('ui-focus-name').innerText = d.focusName || '';
+                document.getElementById('input-ideology').value = d.ideology || ''; document.getElementById('ui-ideology').innerText = d.ideology || '';
                 if(d.subIdeo1) { document.getElementById('input-sub-ideo-1-name').value = d.subIdeo1; document.getElementById('ui-sub-ideo-1').innerText = d.subIdeo1; }
                 if(d.subIdeo2) { document.getElementById('input-sub-ideo-2-name').value = d.subIdeo2; document.getElementById('ui-sub-ideo-2').innerText = d.subIdeo2; }
                 
-                // 이미지 데이터 복구
                 if(d.leaderImg) { document.getElementById('ui-leader-img').src = d.leaderImg; document.getElementById('preview-ui-leader-img').src = d.leaderImg; }
                 if(d.parliamentIcon) { parliamentIconUrl = d.parliamentIcon; document.getElementById('preview-parliament-icon').src = d.parliamentIcon; document.getElementById('ui-parliament-icon-small').src = d.parliamentIcon; }
                 if(d.upperParliamentIcon) { upperParliamentIconUrl = d.upperParliamentIcon; document.getElementById('preview-parliament-icon-upper').src = d.upperParliamentIcon; document.getElementById('ui-parliament-icon-small-upper').src = d.upperParliamentIcon; }
                 
-                // 설정 체크박스 복구
                 if(d.showMajorityLine !== undefined) document.getElementById('input-show-majority-line').checked = d.showMajorityLine;
                 if(d.showRulingHighlight !== undefined) document.getElementById('input-show-ruling-highlight').checked = d.showRulingHighlight;
                 
-                // 명칭 복구
                 if(d.singleName) { singleName = d.singleName; document.getElementById('input-single-name').value = singleName; }
                 if(d.lowerName) { lowerName = d.lowerName; document.getElementById('input-lower-name').value = lowerName; }
                 if(d.upperName) { upperName = d.upperName; document.getElementById('input-upper-name').value = upperName; }
 
-                // 시스템 모드 복구
                 if(d.parliamentType) { parliamentType = d.parliamentType; document.querySelector(`input[name="parliament-type"][value="${parliamentType}"]`).checked = true; updateParliamentType(parliamentType); }
                 if(d.govType) { govType = d.govType; document.querySelector(`input[name="gov-type"][value="${govType}"]`).checked = true; }
                 
-                // 의석 수 복구
                 if(d.totalSeatsLower) document.getElementById('input-total-seats-target').value = d.totalSeatsLower;
                 if(d.totalSeatsUpper) document.getElementById('input-total-seats-upper').value = d.totalSeatsUpper;
 
-                // 정당 및 연합 핵심 데이터 복구
                 alliances = d.alliances || []; 
                 allianceIdCounter = d.allianceIdCounter || 10;
                 parties = d.parties || []; 
                 partyIdCounter = d.partyIdCounter || 100;
                 selectedPartyId = d.selectedPartyId;
                 
-                // 전체 UI 리렌더링
                 updateLabelsAndButtons(); 
                 renderAllianceTable(); 
                 renderControls(); 
@@ -2049,9 +2041,9 @@
                 renderDetailsTable(); 
             } catch(error) { 
                 console.error("JSON 파싱 에러: ", error);
+                // 팝업 제거를 위해 console.error 로만 출력합니다.
             }
-            // 중복 로드 허용을 위해 input 초기화
-            event.target.value = '';
+            event.target.value = ''; // 같은 파일 반복 로드 허용
         };
         reader.readAsText(file);
     }
