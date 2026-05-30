@@ -80,13 +80,6 @@
             }
         }
 
-        /* 자체 알림창 스타일 (alert 대체용) */
-        #custom-notification {
-            display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            background: var(--tfr-pink); color: #fff; padding: 15px 30px; border-radius: 4px;
-            z-index: 9999; box-shadow: 0 0 15px var(--tfr-pink-glow); font-size: 18px; text-align: center;
-        }
-
         /* ==========================================
            3. 좌측 마스터 설정 패널 스타일
            ========================================== */
@@ -276,9 +269,6 @@
     </style>
 </head>
 <body>
-
-<!-- 자체 커스텀 알림창 (alert 대체) -->
-<div id="custom-notification"></div>
 
 <!-- 
   ==========================================
@@ -500,7 +490,7 @@
         <!-- 시각화 1: 국가 및 정치 리더 창 -->
         <div class="hoi4-window politics-window">
             <div class="hoi4-header">
-                <div class="header-title">정치</div>
+                <div class="header-title">정치 및 국가 상황</div>
                 <div class="header-btn">X</div>
             </div>
             <div class="politics-content">
@@ -588,14 +578,6 @@
   ==========================================
 -->
 <script>
-    // 커스텀 알림창 함수 (alert 함수 대신 사용)
-    function showNotification(msg) {
-        const noti = document.getElementById('custom-notification');
-        noti.innerText = msg;
-        noti.style.display = 'block';
-        setTimeout(() => { noti.style.display = 'none'; }, 3000);
-    }
-
     /* 드래그 앤 드롭 업로드를 처리하는 공용 유틸리티 함수 */
     function setupDragAndDrop(elementId, callback) {
         const zone = document.getElementById(elementId);
@@ -795,7 +777,6 @@
         assignSeats('seats', totalSeatsTarget);
         if (parliamentType === '양원제') assignSeats('seatsUpper', totalSeatsUpperTarget);
         renderControls(); renderDashboard();
-        showNotification("성공적으로 무작위 선거 시뮬레이션을 완료했습니다!");
     }
 
     function moveParty(id, direction) {
@@ -1178,7 +1159,6 @@
         const dl = document.createElement('a');
         dl.setAttribute("href", "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data)));
         dl.setAttribute("download", "TFRKP_Simulation_Data.json"); dl.click();
-        showNotification("현재 설정이 JSON 파일로 저장되었습니다.");
     }
 
     function loadDataFromJSON(event) {
@@ -1213,8 +1193,7 @@
                 selectedPartyId = d.selectedPartyId;
                 
                 updateLabelsAndButtons(); renderAllianceTable(); renderControls(); renderDashboard(); renderDetailsTable(); 
-                showNotification("데이터 로드 완료! 시뮬레이터가 성공적으로 복원되었습니다.");
-            } catch(e) { console.error(e); showNotification("로드 실패: 호환되지 않거나 손상된 JSON 파일입니다."); }
+            } catch(e) { console.error(e); }
             event.target.value = '';
         };
         reader.readAsText(file);
@@ -1228,8 +1207,7 @@
             let dateStr = new Date().toISOString().slice(0,10).replace(/-/g,"");
             link.download = `TFRKP_Simulation_${nameSuffix}_${dateStr}.png`; 
             link.href = canvas.toDataURL('image/png'); link.click();
-            showNotification(`'${nameSuffix}' 화면이 고화질 이미지로 저장되었습니다.`);
-        }).catch(err => { console.error("Image Capture Error: ", err); showNotification("이미지 저장 중 오류가 발생했습니다."); });
+        }).catch(err => { console.error("Image Capture Error: ", err); });
     }
 </script>
 </body>
