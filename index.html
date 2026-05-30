@@ -80,6 +80,13 @@
             }
         }
 
+        /* 자체 알림창 스타일 (alert 대체용) */
+        #custom-notification {
+            display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: var(--tfr-pink); color: #fff; padding: 15px 30px; border-radius: 4px;
+            z-index: 9999; box-shadow: 0 0 15px var(--tfr-pink-glow); font-size: 18px; text-align: center;
+        }
+
         /* ==========================================
            3. 좌측 마스터 설정 패널 스타일
            ========================================== */
@@ -96,33 +103,18 @@
         }
 
         .controls-panel h2 {
-            margin-top: 0;
-            color: #ffffff;
-            text-align: center;
-            border-bottom: 2px dashed #333333;
-            padding-bottom: 15px;
-            margin-bottom: 25px;
-            font-size: 32px;
-            letter-spacing: 2px;
-            text-shadow: 2px 2px 0px #000;
+            margin-top: 0; color: #ffffff; text-align: center; border-bottom: 2px dashed #333333;
+            padding-bottom: 15px; margin-bottom: 25px; font-size: 32px; letter-spacing: 2px; text-shadow: 2px 2px 0px #000;
         }
 
         .control-group {
-            margin-bottom: 25px;
-            background: #1e1e1e;
-            padding: 20px;
-            border: 1px solid #333333;
-            border-radius: 4px;
-            transition: border-color 0.3s;
+            margin-bottom: 25px; background: #1e1e1e; padding: 20px; border: 1px solid #333333;
+            border-radius: 4px; transition: border-color 0.3s;
         }
         .control-group:hover { border-color: #555555; }
         .control-group h3 {
-            margin-top: 0;
-            color: var(--tfr-pink);
-            border-bottom: 1px solid #444444;
-            padding-bottom: 10px;
-            font-size: 22px;
-            letter-spacing: 1px;
+            margin-top: 0; color: var(--tfr-pink); border-bottom: 1px solid #444444;
+            padding-bottom: 10px; font-size: 22px; letter-spacing: 1px;
         }
 
         /* ==========================================
@@ -244,14 +236,18 @@
         .ideo-title { font-size: 18px; color: #dddddd; text-align: center; border-bottom: 1px solid #333333; padding-bottom: 12px; font-weight: bold; letter-spacing: 1px; }
         .ideo-sub { display: flex; align-items: center; gap: 12px; font-size: 15px; color: #aaaaaa; }
         
-        .party-box { flex: 1; background: #0c0c0c; border: 1px solid #444444; display: flex; padding: 20px; gap: 20px; box-sizing: border-box; align-items: center; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
-        .pie-container { position: relative; width: 110px; height: 110px; display: flex; justify-content: center; align-items: center; }
-        .pie-ring { position: absolute; width: 120px; height: 120px; border-radius: 50%; border: 4px solid #444444; box-shadow: 0 0 12px #000000; pointer-events: none; }
-        .pie-chart { width: 110px; height: 110px; border-radius: 50%; }
+        .party-box { flex: 1; background: #0c0c0c; border: 1px solid #444444; display: flex; padding: 15px; gap: 15px; box-sizing: border-box; align-items: center; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
         
+        /* 파이 차트 영역: 크기 축소(85px) 및 완벽한 원형(1:1 비율) 강제 고정 */
+        .pie-container { position: relative; width: 85px; height: 85px; display: flex; justify-content: center; align-items: center; flex-shrink: 0; aspect-ratio: 1 / 1; }
+        .pie-ring { position: absolute; width: 95px; height: 95px; border-radius: 50%; border: 4px solid #333333; box-shadow: 0 0 10px #000000; pointer-events: none; flex-shrink: 0; aspect-ratio: 1 / 1; }
+        .pie-chart { width: 85px; height: 85px; border-radius: 50%; flex-shrink: 0; aspect-ratio: 1 / 1; }
+        
+        /* 파이 차트 우측 정당 리스트: 글자 깨짐 및 줄바꿈 방지 적용 (말줄임표 없음) */
         .party-list-sm { flex: 1; display: flex; flex-direction: column; gap: 6px; }
-        .party-row-sm { display: flex; align-items: center; font-size: 14px; color: #dddddd; }
-        .party-color-box { width: 14px; height: 14px; margin-right: 8px; border: 1px solid #000000; }
+        .party-row-sm { display: flex; align-items: center; font-size: 13.5px; color: #dddddd; white-space: nowrap; width: 100%; }
+        .party-color-box { width: 14px; height: 14px; margin-right: 8px; border: 1px solid #000000; flex-shrink: 0; }
+        .party-name-wrapper { white-space: nowrap; flex: 1; display: flex; justify-content: space-between; }
 
         /* 국회(상하원) 윈도우 디테일 */
         .parliament-window { border: 2px solid var(--tfr-gold); box-shadow: 0 0 15px var(--tfr-gold-glow), inset 0 0 15px rgba(0,0,0,1); }
@@ -274,16 +270,15 @@
         .info-image-container img { width: 100%; height: 100%; object-fit: cover; }
         .info-desc { font-size: 14px; color: #bbbbbb; padding: 12px; line-height: 1.6; text-align: justify; overflow-y: hidden; word-break: break-all; }
 
-        /* 배지(딱지) 스타일 - CSS는 남겨두지만 JS에서 렌더링하지 않음 */
-        .coalition-badge { background: #b8860b; color: #ffffff; border: 1px solid #ffd700; font-size: 12px; padding: 3px 8px; margin-left: 10px; border-radius: 3px; text-shadow: 1px 1px 0 rgba(0,0,0,0.5); box-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
-        .alliance-badge { background: #0055aa; color: #ffffff; border: 1px solid #00aaff; font-size: 12px; padding: 3px 8px; margin-left: 6px; border-radius: 3px; text-shadow: 1px 1px 0 rgba(0,0,0,0.5); box-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
-
         @media (max-width: 650px) {
             .input-row, .lower-info-row { flex-direction: column; }
         }
     </style>
 </head>
 <body>
+
+<!-- 자체 커스텀 알림창 (alert 대체) -->
+<div id="custom-notification"></div>
 
 <!-- 
   ==========================================
@@ -505,7 +500,7 @@
         <!-- 시각화 1: 국가 및 정치 리더 창 -->
         <div class="hoi4-window politics-window">
             <div class="hoi4-header">
-                <div class="header-title">정치 및 국가 상황</div>
+                <div class="header-title">정치</div>
                 <div class="header-btn">X</div>
             </div>
             <div class="politics-content">
@@ -593,6 +588,14 @@
   ==========================================
 -->
 <script>
+    // 커스텀 알림창 함수 (alert 함수 대신 사용)
+    function showNotification(msg) {
+        const noti = document.getElementById('custom-notification');
+        noti.innerText = msg;
+        noti.style.display = 'block';
+        setTimeout(() => { noti.style.display = 'none'; }, 3000);
+    }
+
     /* 드래그 앤 드롭 업로드를 처리하는 공용 유틸리티 함수 */
     function setupDragAndDrop(elementId, callback) {
         const zone = document.getElementById(elementId);
@@ -792,6 +795,7 @@
         assignSeats('seats', totalSeatsTarget);
         if (parliamentType === '양원제') assignSeats('seatsUpper', totalSeatsUpperTarget);
         renderControls(); renderDashboard();
+        showNotification("성공적으로 무작위 선거 시뮬레이션을 완료했습니다!");
     }
 
     function moveParty(id, direction) {
@@ -866,17 +870,18 @@
     window.addEventListener('DOMContentLoaded', () => {
         document.getElementById('ui-leader-img').style.backgroundColor = "#222";
         
-        // 현실 정당이 아닌 가상의 정당과 연합으로 데이터 구성
+        // 현실 정치를 모티브로 한 가상의 샘플 정당과 연합 설정
         alliances = [
-            { id: 1, name: "희망과 진보 연합", isRuling: true },
-            { id: 2, name: "자유와 질서 동맹", isRuling: false }
+            { id: 1, name: "민주진보 연합", isRuling: true }, // 기본 집권 여당 설정 (강조선 즉시 표시됨)
+            { id: 2, name: "보수자유 동맹", isRuling: false }
         ];
 
         parties = [
-            { id: 1, name: "미래평화당", color: "#0055aa", seats: 168, seatsUpper: 50, support: 45.2, errorMargin: 3.5, isCoalition: false, allianceId: 1, logoUrl: '', infoImageUrl: '', description: "진보와 복지를 최우선 가치로 삼는 가상의 제1정당입니다." },
-            { id: 2, name: "녹색시민당", color: "#22aa44", seats: 6, seatsUpper: 2, support: 5.3, errorMargin: 1.1, isCoalition: false, allianceId: 1, logoUrl: '', infoImageUrl: '', description: "환경 보호와 시민 참여를 주장하는 소수 정당입니다." },
-            { id: 3, name: "신보수당", color: "#cc2222", seats: 111, seatsUpper: 40, support: 38.5, errorMargin: 4.2, isCoalition: false, allianceId: 2, logoUrl: '', infoImageUrl: '', description: "시장 경제와 국가 안보를 중시하는 가상의 보수 정당입니다." },
-            { id: 4, name: "무소속", color: "#808080", seats: 15, seatsUpper: 8, support: 11.0, errorMargin: 5.0, isCoalition: false, allianceId: null, logoUrl: '', infoImageUrl: '', description: "특정 당적을 보유하지 않은 독립 의원들입니다." }
+            { id: 1, name: "미래민주당", color: "#1b499b", seats: 155, seatsUpper: 50, support: 43.2, errorMargin: 3.5, isCoalition: true, allianceId: 1, logoUrl: '', infoImageUrl: '', description: "시민의 권리와 복지를 최우선으로 삼는 중도진보 성향의 제1정당입니다. (실제 민주당 계열 참고)" },
+            { id: 2, name: "국민보수당", color: "#e61e2b", seats: 115, seatsUpper: 40, support: 38.5, errorMargin: 4.2, isCoalition: false, allianceId: 2, logoUrl: '', infoImageUrl: '', description: "자유 시장 경제와 굳건한 국가 안보를 중시하는 보수 정당입니다. (실제 보수당 계열 참고)" },
+            { id: 3, name: "정의혁신당", color: "#ffc107", seats: 15, seatsUpper: 6, support: 8.3, errorMargin: 2.1, isCoalition: false, allianceId: 1, logoUrl: '', infoImageUrl: '', description: "노동권 강화와 사회적 평등을 강력히 주장하는 진보 정당입니다. (실제 진보당 계열 참고)" },
+            { id: 4, name: "자유개혁당", color: "#ff7f00", seats: 10, seatsUpper: 2, support: 5.0, errorMargin: 1.5, isCoalition: false, allianceId: 2, logoUrl: '', infoImageUrl: '', description: "청년 세대의 목소리와 합리적 개혁을 추구하는 신생 정당입니다. (실제 제3지대 정당 참고)" },
+            { id: 5, name: "무소속", color: "#888888", seats: 5, seatsUpper: 2, support: 5.0, errorMargin: 5.0, isCoalition: false, allianceId: null, logoUrl: '', infoImageUrl: '', description: "특정 당적을 보유하지 않은 독립 의원들입니다." }
         ];
 
         selectedPartyId = 1;
@@ -1015,10 +1020,14 @@
             currentPieAngle += percentage;
             
             // 요구사항 반영 1: 정치창 리스트에서 연합/동맹 뱃지(명칭) 제거. 정당명과 의석수만 표시
+            // 요구사항 반영 2: 말줄임표 없이 한 줄에 온전히 다 나오게 표기 (white-space: nowrap)
             smList.innerHTML += `
                 <div class="party-row-sm">
                     <div class="party-color-box" style="background-color: ${p.color};"></div>
-                    ${p.name} <span style="margin-left:auto;">(${p.seats})</span>
+                    <div class="party-name-wrapper">
+                        <span>${p.name}</span>
+                        <span>(${p.seats})</span>
+                    </div>
                 </div>
             `;
         });
@@ -1118,7 +1127,7 @@
             else summaryHtml = `연립 정부 [${rulingStr}] 총 의석: ${rulingSeats}석 (${rulingPct}%)`;
             document.getElementById(targetSummaryArea).innerHTML = `<div class="coalition-summary">${summaryHtml}</div>`;
 
-            // 요구사항 반영 2: 국회창 리스트에서 여당, 연합 배지(딱지) 모두 제거. 심플하게 이름과 의석수만 출력
+            // 요구사항 반영: 하단 리스트의 여당, 연합 배지(딱지) 모두 제거. 순수 이름과 의석수만.
             let listHtml = '';
             displayParties.forEach(p => { 
                 listHtml += `
@@ -1169,6 +1178,7 @@
         const dl = document.createElement('a');
         dl.setAttribute("href", "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data)));
         dl.setAttribute("download", "TFRKP_Simulation_Data.json"); dl.click();
+        showNotification("현재 설정이 JSON 파일로 저장되었습니다.");
     }
 
     function loadDataFromJSON(event) {
@@ -1203,8 +1213,8 @@
                 selectedPartyId = d.selectedPartyId;
                 
                 updateLabelsAndButtons(); renderAllianceTable(); renderControls(); renderDashboard(); renderDetailsTable(); 
-                alert("데이터 로드 완료! 시뮬레이터가 성공적으로 복원되었습니다.");
-            } catch(e) { console.error(e); alert("로드 실패: 호환되지 않거나 손상된 JSON 파일입니다."); }
+                showNotification("데이터 로드 완료! 시뮬레이터가 성공적으로 복원되었습니다.");
+            } catch(e) { console.error(e); showNotification("로드 실패: 호환되지 않거나 손상된 JSON 파일입니다."); }
             event.target.value = '';
         };
         reader.readAsText(file);
@@ -1218,7 +1228,8 @@
             let dateStr = new Date().toISOString().slice(0,10).replace(/-/g,"");
             link.download = `TFRKP_Simulation_${nameSuffix}_${dateStr}.png`; 
             link.href = canvas.toDataURL('image/png'); link.click();
-        }).catch(err => { console.error("Image Capture Error: ", err); alert("이미지 저장 중 오류가 발생했습니다."); });
+            showNotification(`'${nameSuffix}' 화면이 고화질 이미지로 저장되었습니다.`);
+        }).catch(err => { console.error("Image Capture Error: ", err); showNotification("이미지 저장 중 오류가 발생했습니다."); });
     }
 </script>
 </body>
